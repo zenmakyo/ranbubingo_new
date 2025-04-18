@@ -2,71 +2,79 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>ビンゴ（HTML1枚）</title>
+  <title>ビンゴ</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       font-family: sans-serif;
-      text-align: center;
-      padding: 10px;
-      margin: 0;
       background-color: #d6e5b0; /* 畳色 */
-      color: #333;
+      margin: 0;
+      padding: 1em;
+      text-align: center;
     }
 
     table {
-      width: 90vw;
-      max-width: 600px;
-      margin: 0 auto;
       border-collapse: collapse;
+      margin: auto;
+      width: 90vw;
+      max-width: 500px;
       table-layout: fixed;
     }
 
     td {
       border: 2px solid #333;
-      vertical-align: middle;
-      padding: 0;
+      width: 20%;
+      height: 0;
+      padding-bottom: 20%; /* 正方形にする */
       position: relative;
+      vertical-align: middle;
+      background-color: white;
+    }
+
+    .center-free {
+      background-color: gold;
+      font-size: 2em;
     }
 
     .input-wrapper {
+      position: absolute;
+      top: 0; left: 0;
       width: 100%;
       height: 100%;
       display: flex;
-      justify-content: center;
       align-items: center;
-      position: relative;
+      justify-content: center;
+      padding: 5%;
       box-sizing: border-box;
-      padding: 4px;
     }
 
     input.cellInput {
-      font-size: clamp(14px, 3vw, 18px);
+      width: 100%;
+      height: 100%;
+      font-size: 1em;
       text-align: center;
-      border: 1px solid #ccc;
+      border: 1px solid #aaa;
       border-radius: 6px;
-      padding: 4px 8px;
-      width: 100%; /* セル幅にフィット */
-      height: auto;
-      min-height: 40px; /* 最低高さ */
-      max-height: 80px; /* 最大高さ（適度に調整） */
-      white-space: normal; /* テキスト折り返し */
-      word-wrap: break-word; /* 長い単語も折り返し */
-      resize: none; /* 手動サイズ変更を無効化 */
+      resize: none;
+      overflow: hidden;
+      white-space: normal;
+      word-wrap: break-word;
       box-sizing: border-box;
     }
+
+    td.usedA { background-color: #90caf9; }
+    td.usedB { background-color: #e0e0e0; }
 
     .suggestions {
       position: absolute;
       top: 100%;
       left: 0;
       width: 100%;
-      max-height: 120px;
-      overflow-y: auto;
       background: white;
       border: 1px solid #ccc;
+      max-height: 100px;
+      overflow-y: auto;
       z-index: 10;
-      border-radius: 6px;
       display: none;
     }
 
@@ -77,61 +85,36 @@
     }
 
     .suggestions div:hover {
-      background: #e0e0e0;
-    }
-
-    td.usedA {
-      background-color: #90caf9;
-    }
-
-    td.usedB {
-      background-color: #e0e0e0;
-    }
-
-    td.center-free {
-      background-color: gold;
-      font-size: 1.8em;
+      background-color: #eee;
     }
 
     .button-row {
       margin-top: 20px;
       display: flex;
       justify-content: center;
-      gap: 10px;
+      gap: 20px;
     }
 
-    #randomBtn, #resetBtn {
+    button {
       padding: 10px 20px;
       font-size: 1em;
-      border-radius: 8px;
       border: none;
-      cursor: pointer;
+      border-radius: 8px;
       color: white;
+      cursor: pointer;
     }
 
-    #randomBtn {
-      background-color: #88a05f;
-    }
+    #randomBtn { background-color: #88a05f; }
+    #resetBtn { background-color: #c75b4a; }
 
-    #randomBtn:hover {
-      background-color: #7a9155;
-    }
-
-    #resetBtn {
-      background-color: #c75b4a;
-    }
-
-    #resetBtn:hover {
-      background-color: #b04e3f;
-    }
+    #randomBtn:hover { background-color: #7a9155; }
+    #resetBtn:hover { background-color: #b04e3f; }
   </style>
 </head>
 <body>
-  <h2>スマホ対応ビンゴ</h2>
 
-  <table id="bingo">
-    <tbody></tbody>
-  </table>
+  <h2>スマホ対応ビンゴ</h2>
+  <table id="bingo"><tbody></tbody></table>
 
   <div class="button-row">
     <button id="randomBtn">ランダム配置</button>
@@ -148,8 +131,18 @@
     const specialWords = ["バナナ", "ぶどう", "すいか"];
     const usedWords = new Set();
     const inputs = [];
-
     const table = document.querySelector("#bingo tbody");
+
+    function adjustFontSize(input) {
+      const len = input.value.length;
+      if (len > 10) {
+        input.style.fontSize = "0.7em";
+      } else if (len > 6) {
+        input.style.fontSize = "0.9em";
+      } else {
+        input.style.fontSize = "1em";
+      }
+    }
 
     for (let i = 0; i < 5; i++) {
       const tr = document.createElement("tr");
@@ -158,7 +151,7 @@
 
         if (i === 2 && j === 2) {
           td.className = "center-free";
-          td.innerHTML = "⭐️";
+          td.textContent = "⭐️";
           tr.appendChild(td);
           continue;
         }
@@ -178,9 +171,9 @@
           const value = input.value.trim();
           suggestionBox.innerHTML = "";
 
-          const filtered = (value === "")
-            ? words.filter(w => !usedWords.has(w))
-            : words.filter(w => w.includes(value) && !usedWords.has(w));
+          const filtered = words.filter(word =>
+            word.includes(value) && !usedWords.has(word)
+          );
 
           if (filtered.length === 0) {
             suggestionBox.style.display = "none";
@@ -190,13 +183,14 @@
           filtered.forEach(word => {
             const div = document.createElement("div");
             div.textContent = word;
-            div.addEventListener("click", () => {
+            div.onclick = () => {
               input.value = word;
               input.title = word;
+              adjustFontSize(input);
               suggestionBox.style.display = "none";
 
               if (usedWords.has(word)) {
-                alert("この単語はすでに使用されています");
+                alert("その単語はすでに使われています");
                 input.value = "";
                 td.className = "";
                 return;
@@ -204,19 +198,21 @@
 
               td.className = specialWords.includes(word) ? "usedA" : "usedB";
               usedWords.add(word);
-            });
+            };
             suggestionBox.appendChild(div);
           });
 
           suggestionBox.style.display = "block";
         };
 
-        input.addEventListener("input", updateSuggestions);
+        input.addEventListener("input", () => {
+          adjustFontSize(input);
+          updateSuggestions();
+        });
+
         input.addEventListener("focus", updateSuggestions);
         input.addEventListener("blur", () => {
-          setTimeout(() => {
-            suggestionBox.style.display = "none";
-          }, 200);
+          setTimeout(() => suggestionBox.style.display = "none", 200);
         });
 
         wrapper.appendChild(input);
@@ -229,38 +225,36 @@
       table.appendChild(tr);
     }
 
-    document.getElementById("randomBtn").addEventListener("click", () => {
-      const availableWords = words.filter(w => !usedWords.has(w));
+    document.getElementById("randomBtn").onclick = () => {
+      const available = words.filter(w => !usedWords.has(w));
       const emptyCells = inputs.filter(({ input }) => input.value === "");
 
-      if (availableWords.length < emptyCells.length) {
-        alert("単語が足りません！");
+      if (available.length < emptyCells.length) {
+        alert("単語が足りません");
         return;
       }
 
-      const shuffled = availableWords.sort(() => 0.5 - Math.random());
-
+      const shuffled = available.sort(() => 0.5 - Math.random());
       emptyCells.forEach(({ input, td }, idx) => {
         const word = shuffled[idx];
         input.value = word;
         input.title = word;
+        adjustFontSize(input);
         td.className = specialWords.includes(word) ? "usedA" : "usedB";
         usedWords.add(word);
       });
-    });
+    };
 
-    document.getElementById("resetBtn").addEventListener("click", () => {
+    document.getElementById("resetBtn").onclick = () => {
       inputs.forEach(({ input, td }) => {
         input.value = "";
         input.title = "";
         td.className = "";
+        adjustFontSize(input);
       });
-
-      const centerTd = document.querySelector("td.center-free");
-      if (centerTd) centerTd.innerHTML = "⭐️";
-
+      document.querySelector(".center-free").textContent = "⭐️";
       usedWords.clear();
-    });
+    };
   </script>
 </body>
 </html>
