@@ -42,41 +42,47 @@
       background-color: #f5f5dc;
     }
     .cell-content {
-      width: 100%;
-      height: 100%;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 95%;
+      height: 95%;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-sizing: border-box;
     }
-    .dropdown-container {
+    .custom-dropdown {
       position: relative;
-      width: 90%;
-    }
-    .dropdown-input {
       width: 100%;
-      font-size: 2vmin;
-      padding: 0.2em;
-      text-align: center;
-      box-sizing: border-box;
+      height: 100%;
     }
-    .dropdown-list {
+    .custom-dropdown textarea {
+      width: 100%;
+      height: 100%;
+      font-size: 2vmin;
+      font-family: inherit;
+      text-align: center;
+      resize: none;
+      overflow-wrap: break-word;
+    }
+    .dropdown-options {
       position: absolute;
       top: 100%;
       left: 0;
       right: 0;
-      max-height: 150px;
-      overflow-y: auto;
       background: white;
-      border: 1px solid #aaa;
+      border: 1px solid #999;
+      max-height: 30vmin;
+      overflow-y: auto;
       z-index: 10;
-      display: none;
+      font-size: 2vmin;
     }
-    .dropdown-item {
-      padding: 0.3em;
+    .dropdown-options div {
+      padding: 4px;
       cursor: pointer;
     }
-    .dropdown-item:hover {
+    .dropdown-options div:hover {
       background-color: #eee;
     }
     .button-container {
@@ -104,127 +110,3 @@
 
   <div class="button-container">
     <button onclick="randomFill()">ランダム配置</button>
-    <button onclick="resetBoard()">リセット</button>
-  </div>
-
-  <script>
-    const wordList = [
-      "富士山", "桜", "畳", "抹茶", "着物",
-      "忍者", "侍", "温泉", "盆栽", "和菓子",
-      "鳥居", "祭り", "刀", "お箸", "日本酒",
-      "神社", "茶道", "寿司", "紅葉", "庭園",
-      "折り紙", "雪景色", "太鼓", "歌舞伎", "俳句"
-    ];
-    const rainbowWords = ["抹茶", "桜", "忍者", "寿司", "富士山"];
-    const table = document.querySelector("#bingo tbody");
-
-    const getUsedWords = () => {
-      const used = new Set();
-      document.querySelectorAll('.dropdown-input').forEach(input => {
-        const val = input.value.trim();
-        if (val) used.add(val);
-      });
-      return used;
-    };
-
-    for (let row = 0; row < 5; row++) {
-      const tr = document.createElement("tr");
-      for (let col = 0; col < 5; col++) {
-        const td = document.createElement("td");
-        if (row === 2 && col === 2) {
-          td.classList.add("free-cell");
-        } else {
-          const wrapper = document.createElement("div");
-          wrapper.className = "cell-content";
-
-          const dropdown = document.createElement("div");
-          dropdown.className = "dropdown-container";
-
-          const input = document.createElement("input");
-          input.className = "dropdown-input";
-          input.setAttribute("autocomplete", "off");
-          input.placeholder = "未選択";
-
-          const list = document.createElement("div");
-          list.className = "dropdown-list";
-
-          const updateList = () => {
-            const val = input.value.trim();
-            const used = getUsedWords();
-            list.innerHTML = "";
-            wordList
-              .filter(word => word.includes(val) && (!used.has(word) || word === val))
-              .forEach(word => {
-                const item = document.createElement("div");
-                item.className = "dropdown-item";
-                item.textContent = word;
-                item.onclick = () => {
-                  input.value = word;
-                  list.style.display = "none";
-                  input.dispatchEvent(new Event("change"));
-                };
-                list.appendChild(item);
-              });
-            list.style.display = list.childElementCount ? "block" : "none";
-          };
-
-          input.addEventListener("input", updateList);
-          input.addEventListener("focus", updateList);
-          input.addEventListener("blur", () => {
-            setTimeout(() => list.style.display = "none", 200);
-          });
-
-          input.addEventListener("change", () => {
-            const val = input.value.trim();
-            const used = getUsedWords();
-            if (!wordList.includes(val)) {
-              alert("このワードはリストにありません！");
-              input.value = "";
-              td.style.background = "#ccc";
-            } else if ([...used].filter(w => w === val).length > 1) {
-              alert("このワードはすでに選択済みです！");
-              input.value = "";
-              td.style.background = "#ccc";
-            } else {
-              if (rainbowWords.includes(val)) {
-                td.style.background = "linear-gradient(135deg, #f4d7f4, #d6c6e1, #c0d4f7, #bde5c8, #fffabf, #ffe4b5, #f7b3b3)";
-              } else {
-                td.style.background = "#ccc";
-              }
-            }
-          });
-
-          dropdown.appendChild(input);
-          dropdown.appendChild(list);
-          wrapper.appendChild(dropdown);
-          td.appendChild(wrapper);
-        }
-        tr.appendChild(td);
-      }
-      table.appendChild(tr);
-    }
-
-    function randomFill() {
-      const used = new Set();
-      const inputs = document.querySelectorAll(".dropdown-input");
-      inputs.forEach(input => {
-        let choice;
-        do {
-          choice = wordList[Math.floor(Math.random() * wordList.length)];
-        } while (used.has(choice));
-        used.add(choice);
-        input.value = choice;
-        input.dispatchEvent(new Event("change"));
-      });
-    }
-
-    function resetBoard() {
-      const inputs = document.querySelectorAll(".dropdown-input");
-      inputs.forEach(input => {
-        input.value = "";
-        input.dispatchEvent(new Event("change"));
-      });
-    }
-  </script>
-</body>
-</html>
