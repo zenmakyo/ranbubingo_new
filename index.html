@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>ビンゴ</title>
+  <title>ビンゴ（虹色ワード対応）</title>
   <style>
     body {
       font-family: sans-serif;
@@ -58,8 +58,17 @@
       box-sizing: border-box;
       padding: 0.2em;
     }
-    td.usedA { background-color: #90caf9; }
-    td.usedB { background-color: #e0e0e0; }
+
+    /* 🎨 カラーパターン */
+    td.usedDefault { background-color: #e0e0e0; } /* 基本グレー */
+    td.usedRainbow1 { background-color: #ff9999; } /* 赤 */
+    td.usedRainbow2 { background-color: #ffcc99; } /* 橙 */
+    td.usedRainbow3 { background-color: #ffff99; } /* 黄 */
+    td.usedRainbow4 { background-color: #ccff99; } /* 緑 */
+    td.usedRainbow5 { background-color: #99ffff; } /* 水色 */
+    td.usedRainbow6 { background-color: #99ccff; } /* 青 */
+    td.usedRainbow7 { background-color: #cc99ff; } /* 紫 */
+
     .suggestions {
       position: absolute;
       top: 100%;
@@ -101,7 +110,7 @@
   </style>
 </head>
 <body>
-  <h2>スマホ対応ビンゴ</h2>
+  <h2>ビンゴ（虹色ワード対応）</h2>
   <table id="bingo"><tbody></tbody></table>
   <div class="button-row">
     <button id="randomBtn">ランダム配置</button>
@@ -109,12 +118,23 @@
   </div>
 
   <script>
+    // 📝 編集できる単語リスト
     const words = [
       "りんご", "バナナ", "みかん", "ぶどう", "すいか", "もも", "パイナップル", "キウイ", "レモン", "メロン",
       "なし", "さくらんぼ", "グレープフルーツ", "ブルーベリー", "ストロベリー", "マンゴー", "ドリアン",
       "ライチ", "パッションフルーツ", "アボカド", "ラズベリー", "オレンジ", "ネーブル", "カキ", "イチジク"
     ];
-    const specialWords = ["バナナ", "ぶどう", "すいか"];
+
+    // 🌈 虹色になる特別な単語
+    const rainbowWords = ["バナナ", "すいか", "キウイ", "ブルーベリー", "マンゴー", "レモン", "さくらんぼ"];
+
+    // 🌈 色を順番に使うための配列
+    const rainbowClasses = [
+      "usedRainbow1", "usedRainbow2", "usedRainbow3",
+      "usedRainbow4", "usedRainbow5", "usedRainbow6", "usedRainbow7"
+    ];
+    let rainbowIndex = 0;
+
     const usedWords = new Set();
     const inputs = [];
     const table = document.querySelector("#bingo tbody");
@@ -171,7 +191,12 @@
                 td.className = "";
                 return;
               }
-              td.className = specialWords.includes(word) ? "usedA" : "usedB";
+              if (rainbowWords.includes(word)) {
+                td.className = rainbowClasses[rainbowIndex % rainbowClasses.length];
+                rainbowIndex++;
+              } else {
+                td.className = "usedDefault";
+              }
               usedWords.add(word);
             };
             suggestionBox.appendChild(div);
@@ -206,7 +231,12 @@
         const word = shuffled[idx];
         input.value = word;
         input.title = word;
-        td.className = specialWords.includes(word) ? "usedA" : "usedB";
+        if (rainbowWords.includes(word)) {
+          td.className = rainbowClasses[rainbowIndex % rainbowClasses.length];
+          rainbowIndex++;
+        } else {
+          td.className = "usedDefault";
+        }
         usedWords.add(word);
       });
     };
@@ -218,6 +248,7 @@
         td.className = "";
       });
       usedWords.clear();
+      rainbowIndex = 0;
     };
   </script>
 </body>
