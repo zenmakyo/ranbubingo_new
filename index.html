@@ -8,15 +8,22 @@
     html, body {
       margin: 0;
       padding: 0;
-      background-color: #e6f0d5; /* 和っぽい淡い緑 */
+      background-color: #A5A051; /* 和風抹茶色 */
       font-family: sans-serif;
+    }
+    h1 {
+      text-align: center;
+      font-size: 6vmin;
+      color: white;
+      margin: 1em 0 0.5em;
     }
     table {
       width: 90vmin;
       height: 90vmin;
-      margin: 2vmin auto;
+      margin: 1vmin auto;
       border-collapse: collapse;
       table-layout: fixed;
+      background-color: white;
     }
     td {
       border: 2px solid #555;
@@ -65,10 +72,10 @@
       margin: 15px auto;
     }
     .controls button {
-      font-size: 2vmin;
-      margin: 0 1em;
-      padding: 0.5em 1.5em;
-      border-radius: 6px;
+      font-size: 3vmin;
+      margin: 0 1.5em;
+      padding: 0.6em 2em;
+      border-radius: 8px;
       border: none;
       background: #666;
       color: white;
@@ -77,6 +84,8 @@
   </style>
 </head>
 <body>
+
+<h1>ビンゴ</h1>
 
 <table id="bingo">
   <!-- JSでセルを作成 -->
@@ -92,7 +101,7 @@
   const words = [
     "富士山", "桜", "忍者", "寿司", "着物", "侍", "歌舞伎", "温泉", "神社", "祭り",
     "畳", "茶道", "盆栽", "和菓子", "折り紙", "刀", "花火", "餅", "縁側", "こたつ",
-    "おにぎり", "味噌汁", "浮世絵", "将軍", "抹茶"
+    "おにぎり", "味噌汁", "浮世絵", "将軍", "抹茶あああああああああああああああああああああ"
   ];
 
   const rainbowWords = ["富士山", "桜", "忍者", "寿司"];
