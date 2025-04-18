@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <title>ビンゴ（矢印が収まる入力補完）</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <title>スマホ対応ビンゴ</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       font-family: sans-serif;
@@ -29,26 +29,45 @@
     }
 
     .input-wrapper {
+      width: 100%;
+      height: 100%;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100%;
+      flex-direction: column;
+      position: relative;
     }
 
     input.cellInput {
       width: 90%;
-      height: 60%;
-      font-size: clamp(14px, 3.5vw, 18px);
+      height: 40%;
+      font-size: clamp(14px, 3vw, 18px);
       text-align: center;
       border: 1px solid #ccc;
       border-radius: 6px;
       box-sizing: border-box;
-      appearance: auto;
     }
 
-    input.cellInput:focus {
-      outline: none;
-      background-color: #fffde7;
+    .suggestions {
+      position: absolute;
+      top: 60%;
+      width: 90%;
+      max-height: 100px;
+      overflow-y: auto;
+      background: white;
+      border: 1px solid #ccc;
+      z-index: 10;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .suggestions div {
+      padding: 4px;
+      cursor: pointer;
+    }
+
+    .suggestions div:hover {
+      background: #e0e0e0;
     }
 
     td.usedA {
@@ -61,13 +80,10 @@
   </style>
 </head>
 <body>
-  <h2>ビンゴ（矢印も収まる補完付き入力）</h2>
-
+  <h2>スマホ対応ビンゴ</h2>
   <table id="bingo">
     <tbody></tbody>
   </table>
-
-  <datalist id="wordList"></datalist>
 
   <script>
     const words = [
@@ -80,16 +96,7 @@
     const usedWords = new Set();
 
     const table = document.querySelector("#bingo tbody");
-    const datalist = document.getElementById("wordList");
 
-    // datalistに候補を追加
-    words.forEach(word => {
-      const option = document.createElement("option");
-      option.value = word;
-      datalist.appendChild(option);
-    });
-
-    // セル作成
     for (let i = 0; i < 5; i++) {
       const tr = document.createElement("tr");
       for (let j = 0; j < 5; j++) {
@@ -99,31 +106,61 @@
 
         const input = document.createElement("input");
         input.type = "text";
-        input.setAttribute("list", "wordList");
         input.className = "cellInput";
         input.placeholder = "未選択";
 
-        input.addEventListener("change", () => {
-          const val = input.value.trim();
-          if (!words.includes(val)) {
-            alert("リストにない単語です");
-            input.value = "";
-            td.className = "";
+        const suggestionBox = document.createElement("div");
+        suggestionBox.className = "suggestions";
+
+        input.addEventListener("input", () => {
+          const value = input.value.trim();
+          suggestionBox.innerHTML = "";
+
+          if (value === "") {
+            suggestionBox.style.display = "none";
             return;
           }
 
-          if (usedWords.has(val)) {
-            alert("この単語はすでに使用されています");
-            input.value = "";
-            td.className = "";
+          const filtered = words.filter(
+            w => w.startsWith(value) && !usedWords.has(w)
+          );
+
+          if (filtered.length === 0) {
+            suggestionBox.style.display = "none";
             return;
           }
 
-          td.className = specialWords.includes(val) ? "usedA" : "usedB";
-          usedWords.add(val);
+          filtered.forEach(word => {
+            const div = document.createElement("div");
+            div.textContent = word;
+            div.addEventListener("click", () => {
+              input.value = word;
+              suggestionBox.style.display = "none";
+
+              if (usedWords.has(word)) {
+                alert("この単語はすでに使用されています");
+                input.value = "";
+                td.className = "";
+                return;
+              }
+
+              td.className = specialWords.includes(word) ? "usedA" : "usedB";
+              usedWords.add(word);
+            });
+            suggestionBox.appendChild(div);
+          });
+
+          suggestionBox.style.display = "block";
+        });
+
+        input.addEventListener("blur", () => {
+          setTimeout(() => {
+            suggestionBox.style.display = "none";
+          }, 200);
         });
 
         wrapper.appendChild(input);
+        wrapper.appendChild(suggestionBox);
         td.appendChild(wrapper);
         tr.appendChild(td);
       }
