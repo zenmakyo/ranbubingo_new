@@ -92,7 +92,8 @@
         for (let col = 0; col < 5; col++) {
           const isCenter = row === 2 && col === 2;
           if (isCenter) {
-            document.write(`<td class="cell free-cell" data-row="${row}" data-col="${col}"><div class="cell-content">★</div></td>`);
+            document.write(`<td class="cell free-cell" data-row="${row}" data-col="${col}"><div class="cell-content">
+            <img src="rainbowranbu.png" alt="Free" style="width: 80%; height: 80%; object-fit: contain;"></div></td>`);
           } else {
             document.write(`
               <td class="cell" data-row="${row}" data-col="${col}">
