@@ -46,10 +46,14 @@
       border: 1px solid #ccc;
       border-radius: 6px;
       padding: 4px 8px;
-      width: fit-content;
-      max-width: 90%;
-      white-space: nowrap;
-      overflow-x: auto;
+      width: 100%; /* セル幅にフィット */
+      height: auto;
+      min-height: 40px; /* 最低高さ */
+      max-height: 80px; /* 最大高さ（適度に調整） */
+      white-space: normal; /* テキスト折り返し */
+      word-wrap: break-word; /* 長い単語も折り返し */
+      resize: none; /* 手動サイズ変更を無効化 */
+      box-sizing: border-box;
     }
 
     .suggestions {
