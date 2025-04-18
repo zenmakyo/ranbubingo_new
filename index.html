@@ -7,20 +7,20 @@
   <link href="https://fonts.googleapis.com/css2?family=Zen+Kurenaido&display=swap" rel="stylesheet">
   <style>
     body {
-      background-color: #98AB6F; /* 深い抹茶色 */
+      background-color: #98AB6F;
       margin: 0;
       font-family: sans-serif;
       text-align: center;
     }
     h1 {
-  font-family: 'Zen Kurenaido', sans-serif;
-  font-size: 3.5rem;
-  color: white;
-  -webkit-text-stroke: 3px black;
-  paint-order: stroke fill;
-  font-weight: bold;
-  padding: 1rem;
-}
+      font-family: 'Zen Kurenaido', sans-serif;
+      font-size: 3.5rem;
+      color: white;
+      -webkit-text-stroke: 3px black;
+      paint-order: stroke fill;
+      font-weight: bold;
+      padding: 1rem;
+    }
     table {
       width: 90vmin;
       height: 90vmin;
@@ -39,7 +39,7 @@
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
-      background-color: #f5f5dc; /* 利休白茶 */
+      background-color: #f5f5dc;
     }
     .cell-content {
       width: 100%;
@@ -58,10 +58,6 @@
       text-align: center;
       resize: none;
     }
-    .rainbow {
-      background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet);
-      color: white;
-    }
     .button-container {
       margin-top: 1rem;
       display: flex;
@@ -73,7 +69,7 @@
       font-size: 1rem;
       border: none;
       border-radius: 8px;
-      background-color: #2e4e1e; /* 濃い緑 */
+      background-color: #2e4e1e;
       color: white;
       cursor: pointer;
     }
@@ -91,7 +87,6 @@
   </div>
 
   <script>
-    // 編集可能なビンゴワード一覧（ここを書き換えてOK）
     const wordList = [
       "富士山", "桜", "畳", "抹茶", "着物",
       "忍者", "侍", "温泉", "盆栽", "和菓子",
@@ -99,19 +94,17 @@
       "神社", "茶道", "寿司", "紅葉", "庭園",
       "折り紙", "雪景色", "太鼓", "歌舞伎", "俳句"
     ];
-
-    // 虹色になる単語（ここで指定）
     const rainbowWords = ["抹茶", "桜", "忍者", "寿司", "富士山"];
 
     const table = document.querySelector("#bingo tbody");
 
-    // 5x5 のビンゴ表を生成
     for (let row = 0; row < 5; row++) {
       const tr = document.createElement("tr");
       for (let col = 0; col < 5; col++) {
         const td = document.createElement("td");
         td.dataset.row = row;
         td.dataset.col = col;
+
         if (row === 2 && col === 2) {
           td.classList.add("free-cell");
         } else {
@@ -123,43 +116,46 @@
           input.placeholder = "未選択";
 
           input.addEventListener("input", () => {
-  // 入力中は背景をリセット（or 虹色に）
-  const val = input.value.trim();
-  if (rainbowWords.includes(val)) {
-    td.style.background = "linear-gradient(135deg, #f4d7f4, #d6c6e1, #c0d4f7, #bde5c8, #fffabf, #ffe4b5, #f7b3b3)";
-    input.style.backgroundColor = "white";
-    input.style.color = "black";
-  } else {
-    td.style.background = "#ccc";
-    input.style.backgroundColor = "white";
-    input.style.color = "black";
-  }
-});
+            const val = input.value.trim();
+            if (rainbowWords.includes(val)) {
+              td.style.background = "linear-gradient(135deg, #f4d7f4, #d6c6e1, #c0d4f7, #bde5c8, #fffabf, #ffe4b5, #f7b3b3)";
+              input.style.backgroundColor = "white";
+              input.style.color = "black";
+            } else {
+              td.style.background = "#ccc";
+              input.style.backgroundColor = "white";
+              input.style.color = "black";
+            }
+          });
 
-input.addEventListener("change", () => {
-  const val = input.value.trim();
-  if (val === "") {
-    td.style.background = "#ccc";
-    return;
-  }
+          input.addEventListener("change", () => {
+            const val = input.value.trim();
+            if (val === "") {
+              td.style.background = "#ccc";
+              return;
+            }
+            if (!wordList.includes(val)) {
+              alert("このワードはリストにありません！");
+              input.value = "";
+              td.style.background = "#ccc";
+              return;
+            }
+            if (!rainbowWords.includes(val)) {
+              td.style.background = "#ccc";
+              input.style.backgroundColor = "white";
+              input.style.color = "black";
+            }
+          });
 
-  if (!wordList.includes(val)) {
-    alert("このワードはリストにありません！");
-    input.value = "";
-    td.style.background = "#ccc";
-    return;
-  }
+          wrapper.appendChild(input);
+          td.appendChild(wrapper);
+        }
 
-  // もしリストに含まれていて虹色ワードでなければ再確認
-  if (!rainbowWords.includes(val)) {
-    td.style.background = "#ccc";
-    input.style.backgroundColor = "white";
-    input.style.color = "black";
-  }
-});
+        tr.appendChild(td);
+      }
+      table.appendChild(tr);
+    }
 
-
-    // datalist を追加（リスト入力補完）
     const dataList = document.createElement("datalist");
     dataList.id = "word-options";
     wordList.forEach(word => {
@@ -169,7 +165,6 @@ input.addEventListener("change", () => {
     });
     document.body.appendChild(dataList);
 
-    // ランダム配置
     function randomFill() {
       const used = new Set();
       const inputs = document.querySelectorAll("input");
@@ -185,7 +180,6 @@ input.addEventListener("change", () => {
       });
     }
 
-    // リセット
     function resetBoard() {
       const inputs = document.querySelectorAll("input");
       inputs.forEach(input => {
