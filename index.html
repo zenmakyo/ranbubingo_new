@@ -100,7 +100,7 @@
 </head>
 <body>
   <h1>乱舞ビンゴ
-  <br><span style="font-size: 1.5rem; line-height: 0.5;">大会</span>
+  <br><span style="font-size: 1.5rem; line-height: 1.2;">大会</span>
   </h1>
   <table id="bingo">
     <tbody></tbody>
@@ -144,21 +144,13 @@
           const suggestionBox = document.createElement("div");
           suggestionBox.className = "suggestions";
 
-          let compositionInProgress = false;
-
-          input.addEventListener("compositionstart", () => compositionInProgress = true);
-          input.addEventListener("compositionend", () => {
-            compositionInProgress = false;
-            updateSuggestions(input, suggestionBox);
-          });
-
           input.addEventListener("focus", () => {
             updateSuggestions(input, suggestionBox);
             suggestionBox.style.display = "block";
           });
 
           input.addEventListener("input", () => {
-            if (!compositionInProgress) updateSuggestions(input, suggestionBox);
+            updateSuggestions(input, suggestionBox);
           });
 
           input.addEventListener("blur", () => {
@@ -168,7 +160,7 @@
           suggestionBox.addEventListener("mousedown", (e) => {
             if (e.target.tagName === "DIV") {
               const selected = e.target.textContent;
-              if (Array.from(document.querySelectorAll("input")).some(i => i.value.trim() === selected)) {
+              if (usedWords.has(selected)) {
                 alert("すでに使用されています！");
                 return;
               }
@@ -186,7 +178,7 @@
               td.style.background = "#ccc";
               return;
             }
-            if (Array.from(document.querySelectorAll("input")).some(i => i !== input && i.value.trim() === val)) {
+            if (usedWords.has(val)) {
               alert("すでに使用されています！");
               input.value = "";
               td.style.background = "#ccc";
@@ -207,11 +199,11 @@
 
     function updateSuggestions(input, suggestionBox) {
       const val = input.value.trim();
-      const currentUsed = Array.from(document.querySelectorAll("input")).map(i => i.value.trim()).filter(v => v && v !== val);
+      const currentUsed = Array.from(document.querySelectorAll("input")).map(i => i.value.trim());
       suggestionBox.innerHTML = "";
 
       wordList.forEach(word => {
-        if (!currentUsed.includes(word) && word.includes(val)) {
+        if (!currentUsed.includes(word)) {
           const div = document.createElement("div");
           div.textContent = word;
           suggestionBox.appendChild(div);
@@ -230,15 +222,16 @@
       }
     }
 
+    // ★ ここだけ変更しました
     function randomFill() {
+      resetBoard(); // 入力＆背景＆usedWordsをクリア
+
       const inputs = Array.from(document.querySelectorAll("input"));
-      const available = wordList.filter(word => !usedWords.has(word));
-      const shuffled = available.sort(() => Math.random() - 0.5).slice(0, inputs.length);
-      usedWords.clear();
+      const available = wordList.slice().sort(() => Math.random() - 0.5); // シャッフル
 
       inputs.forEach((input, idx) => {
         const td = input.closest("td");
-        const val = shuffled[idx];
+        const val = available[idx];
         input.value = val;
         finalizeInput(input, td, val);
       });
