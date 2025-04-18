@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>ビンゴゲーム</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 10px;
+    }
+
+    table {
+      width: 90vw;
+      max-width: 600px;
+      margin: 0 auto;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    td {
+      width: 20%;
+      padding: 0;
+      aspect-ratio: 1 / 1;
+      border: 2px solid #333;
+      font-size: clamp(14px, 4vw, 24px);
+      text-align: center;
+      vertical-align: middle;
+      cursor: pointer;
+      background-color: #f0f0f0;
+      transition: background-color 0.3s ease;
+    }
+
+    td:hover {
+      background-color: #e0e0e0;
+    }
+
+    #inputArea {
+      margin-top: 20px;
+      display: none;
+    }
+
+    select {
+      font-size: 16px;
+      padding: 5px;
+      width: 60vw;
+      max-width: 300px;
+    }
+
+    button {
+      font-size: 16px;
+      padding: 6px 12px;
+      margin: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h2>ビンゴゲーム</h2>
+
+  <table id="bingo">
+    <tbody></tbody>
+  </table>
+
+  <div id="inputArea">
+    <label>
+      単語を選択:
+      <select id="wordSelect"></select>
+    </label><br>
+    <button id="submitBtn">決定</button>
+    <button id="cancelBtn">キャンセル</button>
+  </div>
+
+  <script>
+    const words = [
+      "りんご", "バナナ", "みかん", "ぶどう", "すいか", "もも", "パイナップル", "キウイ", "レモン", "メロン",
+      "なし", "さくらんぼ", "グレープフルーツ", "ブルーベリー", "ストロベリー", "マンゴー", "ドリアン",
+      "ライチ", "パッションフルーツ", "アボカド", "ラズベリー", "オレンジ", "ネーブル", "カキ", "イチジク"
+    ];
+
+    const specialWords = ["バナナ", "ぶどう", "すいか"]; // 背景色を変える単語
+
+    const usedWords = new Set();
+    const wordSelect = document.getElementById("wordSelect");
+    const inputArea = document.getElementById("inputArea");
+    const table = document.getElementById("bingo").getElementsByTagName("tbody")[0];
+    let currentCell = null;
+
+    // セル生成
+    for (let i = 0; i < 5; i++) {
+      const tr = document.createElement("tr");
+      for (let j = 0; j < 5; j++) {
+        const td = document.createElement("td");
+        td.addEventListener("click", () => {
+          currentCell = td;
+          showInputArea();
+        });
+        tr.appendChild(td);
+      }
+      table.appendChild(tr);
+    }
+
+    function updateSelectList() {
+      wordSelect.innerHTML = "";
+      const available = words.filter(w => !usedWords.has(w));
+
+      if (available.length === 0) {
+        const opt = document.createElement("option");
+        opt.textContent = "全て使用済み";
+        opt.disabled = true;
+        wordSelect.appendChild(opt);
+        return;
+      }
+
+      const placeholder = document.createElement("option");
+      placeholder.textContent = "単語を選んでください";
+      placeholder.disabled = true;
+      placeholder.selected = true;
+      wordSelect.appendChild(placeholder);
+
+      available.forEach(word => {
+        const option = document.createElement("option");
+        option.value = word;
+        option.textContent = word;
+        wordSelect.appendChild(option);
+      });
+    }
+
+    function showInputArea() {
+      updateSelectList();
+      inputArea.style.display = "block";
+    }
+
+    function hideInputArea() {
+      inputArea.style.display = "none";
+    }
+
+    document.getElementById("submitBtn").addEventListener("click", () => {
+      const value = wordSelect.value;
+      if (!value || usedWords.has(value)) {
+        alert("無効な選択です！");
+        return;
+      }
+
+      currentCell.textContent = value;
+      usedWords.add(value);
+
+      // 背景色設定
+      if (specialWords.includes(value)) {
+        currentCell.style.backgroundColor = "#90caf9";  // 色A（水色）
+      } else {
+        currentCell.style.backgroundColor = "#f0f0f0";  // 色B（既定）
+      }
+
+      hideInputArea();
+    });
+
+    document.getElementById("cancelBtn").addEventListener("click", () => {
+      hideInputArea();
+    });
+
+    updateSelectList();
+  </script>
+</body>
+</html>
