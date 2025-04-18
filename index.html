@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>ビンゴ（入力補完つき）</title>
+  <title>ビンゴ（矢印が収まる入力補完）</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     body {
@@ -28,13 +28,22 @@
       position: relative;
     }
 
-    input.cellInput {
-      width: 100%;
+    .input-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
       height: 100%;
-      font-size: clamp(14px, 4vw, 18px);
+    }
+
+    input.cellInput {
+      width: 90%;
+      height: 60%;
+      font-size: clamp(14px, 3.5vw, 18px);
       text-align: center;
-      border: none;
-      background-color: transparent;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+      appearance: auto;
     }
 
     input.cellInput:focus {
@@ -52,7 +61,7 @@
   </style>
 </head>
 <body>
-  <h2>ビンゴ（入力補完つき）</h2>
+  <h2>ビンゴ（矢印も収まる補完付き入力）</h2>
 
   <table id="bingo">
     <tbody></tbody>
@@ -73,7 +82,7 @@
     const table = document.querySelector("#bingo tbody");
     const datalist = document.getElementById("wordList");
 
-    // datalistに候補追加
+    // datalistに候補を追加
     words.forEach(word => {
       const option = document.createElement("option");
       option.value = word;
@@ -85,6 +94,9 @@
       const tr = document.createElement("tr");
       for (let j = 0; j < 5; j++) {
         const td = document.createElement("td");
+        const wrapper = document.createElement("div");
+        wrapper.className = "input-wrapper";
+
         const input = document.createElement("input");
         input.type = "text";
         input.setAttribute("list", "wordList");
@@ -111,7 +123,8 @@
           usedWords.add(val);
         });
 
-        td.appendChild(input);
+        wrapper.appendChild(input);
+        td.appendChild(wrapper);
         tr.appendChild(td);
       }
       table.appendChild(tr);
