@@ -49,40 +49,35 @@
       justify-content: center;
       padding: 5%;
       box-sizing: border-box;
+      position: relative;
     }
-    .dropdown-wrapper {
+    .cell-content input {
       width: 85%;
       height: 85%;
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .custom-input {
-      width: 100%;
-      height: 100%;
-      font-size: 2vmin;
-      padding: 0;
-      text-align: center;
       box-sizing: border-box;
+      font-size: 2vmin;
+      text-align: center;
+      resize: none;
     }
-    .suggestions {
+    .suggestion-box {
       position: absolute;
       top: 100%;
-      left: 0;
-      right: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: white;
+      border: 1px solid #aaa;
+      z-index: 100;
       max-height: 30vmin;
       overflow-y: auto;
-      background: white;
-      border: 1px solid #999;
-      z-index: 10;
       font-size: 2vmin;
+      width: 90%;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
     }
-    .suggestions div {
-      padding: 0.3rem;
+    .suggestion-box div {
+      padding: 5px;
       cursor: pointer;
     }
-    .suggestions div:hover {
+    .suggestion-box div:hover {
       background-color: #eee;
     }
     .button-container {
@@ -138,51 +133,59 @@
           const wrapper = document.createElement("div");
           wrapper.className = "cell-content";
 
-          const dropdown = document.createElement("div");
-          dropdown.className = "dropdown-wrapper";
-
           const input = document.createElement("input");
-          input.type = "text";
           input.placeholder = "未選択";
-          input.className = "custom-input";
 
           const suggestionBox = document.createElement("div");
-          suggestionBox.className = "suggestions";
+          suggestionBox.className = "suggestion-box";
           suggestionBox.style.display = "none";
+          wrapper.appendChild(input);
+          wrapper.appendChild(suggestionBox);
+          td.appendChild(wrapper);
 
-          wordList.forEach(word => {
-            const suggestion = document.createElement("div");
-            suggestion.textContent = word;
-            suggestion.addEventListener("click", () => {
-              if (isWordUsed(word)) return;
-              input.value = word;
-              suggestionBox.style.display = "none";
-              updateCellStyle(td, input.value);
-            });
-            suggestionBox.appendChild(suggestion);
-          });
+          function updateCellStyle(val) {
+            if (rainbowWords.includes(val)) {
+              td.style.background = "linear-gradient(135deg, #f4d7f4, #d6c6e1, #c0d4f7, #bde5c8, #fffabf, #ffe4b5, #f7b3b3)";
+            } else {
+              td.style.background = "#ccc";
+            }
+          }
 
-          input.addEventListener("input", () => {
-            const val = input.value.trim();
-            updateCellStyle(td, val);
-            const filtered = wordList.filter(w => w.includes(val));
+          function isWordUsed(word) {
+            const inputs = document.querySelectorAll("input");
+            for (const inp of inputs) {
+              if (inp.value.trim() === word) return true;
+            }
+            return false;
+          }
+
+          function showSuggestions(val) {
             suggestionBox.innerHTML = "";
+            const filtered = wordList.filter(w => w.includes(val));
             filtered.forEach(word => {
               const div = document.createElement("div");
               div.textContent = word;
               div.addEventListener("click", () => {
-                if (isWordUsed(word)) return;
+                if (isWordUsed(word)) {
+                  alert("このワードはすでに使用されています！");
+                  return;
+                }
                 input.value = word;
                 suggestionBox.style.display = "none";
-                updateCellStyle(td, input.value);
+                updateCellStyle(word);
               });
               suggestionBox.appendChild(div);
             });
             suggestionBox.style.display = "block";
+          }
+
+          input.addEventListener("focus", () => {
+            showSuggestions("");
           });
 
-          input.addEventListener("blur", () => {
-            setTimeout(() => suggestionBox.style.display = "none", 200);
+          input.addEventListener("input", () => {
+            updateCellStyle(input.value.trim());
+            showSuggestions(input.value.trim());
           });
 
           input.addEventListener("change", () => {
@@ -197,41 +200,25 @@
               td.style.background = "#ccc";
               return;
             }
-            if (isWordUsed(val)) {
-              alert("このワードはすでに使われています！");
-              input.value = "";
-              td.style.background = "#ccc";
-              return;
-            }
-            updateCellStyle(td, val);
+            updateCellStyle(val);
           });
 
-          dropdown.appendChild(input);
-          dropdown.appendChild(suggestionBox);
-          wrapper.appendChild(dropdown);
-          td.appendChild(wrapper);
+          document.addEventListener("click", (e) => {
+            if (!wrapper.contains(e.target)) {
+              suggestionBox.style.display = "none";
+            }
+          });
         }
+
         tr.appendChild(td);
       }
       table.appendChild(tr);
     }
 
-    function updateCellStyle(td, val) {
-      if (rainbowWords.includes(val)) {
-        td.style.background = "linear-gradient(120deg, #f4d7f4, #d6c6e1, #c0d4f7, #bde5c8, #fffabf, #ffe4b5, #f7b3b3)";
-      } else {
-        td.style.background = "#ccc";
-      }
-    }
-
-    function isWordUsed(word) {
-      const inputs = document.querySelectorAll(".custom-input");
-      return Array.from(inputs).some(input => input.value === word);
-    }
-
     function randomFill() {
       const used = new Set();
-      const inputs = document.querySelectorAll(".custom-input");
+      const inputs = document.querySelectorAll("input");
+
       inputs.forEach(input => {
         let choice;
         do {
@@ -239,15 +226,15 @@
         } while (used.has(choice));
         used.add(choice);
         input.value = choice;
-        updateCellStyle(input.closest("td"), choice);
+        input.dispatchEvent(new Event("input"));
       });
     }
 
     function resetBoard() {
-      const inputs = document.querySelectorAll(".custom-input");
+      const inputs = document.querySelectorAll("input");
       inputs.forEach(input => {
         input.value = "";
-        updateCellStyle(input.closest("td"), "");
+        input.dispatchEvent(new Event("input"));
       });
     }
   </script>
