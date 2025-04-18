@@ -49,36 +49,37 @@
       justify-content: center;
       padding: 5%;
       box-sizing: border-box;
+      position: relative;
     }
-    .cell-content input {
+    .cell-input {
       width: 85%;
       height: 85%;
       box-sizing: border-box;
       font-size: 2vmin;
       text-align: center;
-      resize: none;
       position: relative;
-      z-index: 2;
     }
-    .autocomplete-list {
+    .suggestions {
       position: absolute;
       top: 90%;
       left: 50%;
       transform: translateX(-50%);
-      width: 90%;
-      max-height: 12rem;
+      width: 150%;
+      max-height: 50vmin;
       overflow-y: auto;
-      background: white;
+      background-color: white;
       border: 1px solid #ccc;
-      z-index: 3;
+      border-radius: 5px;
+      z-index: 10;
+      display: none;
       font-size: 2vmin;
     }
-    .autocomplete-item {
-      padding: 0.3em 0.5em;
+    .suggestions div {
+      padding: 0.5rem;
       cursor: pointer;
     }
-    .autocomplete-item:hover {
-      background: #eee;
+    .suggestions div:hover {
+      background-color: #eee;
     }
     .button-container {
       margin-top: 1rem;
@@ -119,70 +120,9 @@
       "折り紙", "雪景色", "太鼓", "歌舞伎", "俳句"
     ];
     const rainbowWords = ["抹茶", "桜", "忍者", "寿司", "富士山"];
+    const usedWords = new Set();
 
     const table = document.querySelector("#bingo tbody");
-
-    function createAutocomplete(input, td) {
-      const wrapper = td.querySelector(".cell-content");
-      let list = document.createElement("div");
-      list.className = "autocomplete-list";
-      wrapper.appendChild(list);
-
-      function showList(filter) {
-        list.innerHTML = "";
-        const usedWords = Array.from(document.querySelectorAll("input")).map(i => i.value.trim());
-        const matches = wordList.filter(w => w.includes(filter) || filter === "").filter(w => !usedWords.includes(w));
-        matches.forEach(word => {
-          const item = document.createElement("div");
-          item.className = "autocomplete-item";
-          item.textContent = word;
-          item.onclick = () => {
-            input.value = word;
-            input.dispatchEvent(new Event("input"));
-            list.innerHTML = "";
-          };
-          list.appendChild(item);
-        });
-      }
-
-      input.addEventListener("focus", () => {
-        showList(input.value.trim());
-      });
-
-      input.addEventListener("input", () => {
-        const val = input.value.trim();
-        const used = Array.from(document.querySelectorAll("input"))
-                          .filter(i => i !== input)
-                          .map(i => i.value.trim());
-
-        if (val === "") {
-          td.style.background = "#ccc";
-          return;
-        }
-
-        if (!wordList.includes(val)) {
-          return;
-        }
-
-        if (used.includes(val)) {
-          alert("すでに使用されています！");
-          input.value = "";
-          td.style.background = "#ccc";
-          return;
-        }
-
-        td.style.background = rainbowWords.includes(val)
-          ? "linear-gradient(135deg, #f4d7f4, #d6c6e1, #c0d4f7, #bde5c8, #fffabf, #ffe4b5, #f7b3b3)"
-          : "#ccc";
-        input.style.backgroundColor = "white";
-        input.style.color = "black";
-        showList(val);
-      });
-
-      document.addEventListener("click", (e) => {
-        if (!wrapper.contains(e.target)) list.innerHTML = "";
-      });
-    }
 
     for (let row = 0; row < 5; row++) {
       const tr = document.createElement("tr");
@@ -198,11 +138,58 @@
           wrapper.className = "cell-content";
 
           const input = document.createElement("input");
-          input.placeholder = "未選択";
+          input.className = "cell-input";
+          input.setAttribute("placeholder", "未選択");
+
+          const suggestionBox = document.createElement("div");
+          suggestionBox.className = "suggestions";
+
+          input.addEventListener("focus", () => {
+            updateSuggestions(input, suggestionBox);
+            suggestionBox.style.display = "block";
+          });
+
+          input.addEventListener("input", () => {
+            updateSuggestions(input, suggestionBox);
+          });
+
+          input.addEventListener("blur", () => {
+            setTimeout(() => suggestionBox.style.display = "none", 200);
+          });
+
+          suggestionBox.addEventListener("mousedown", (e) => {
+            if (e.target.tagName === "DIV") {
+              const selected = e.target.textContent;
+              if (usedWords.has(selected)) {
+                alert("すでに使用されています！");
+                return;
+              }
+              input.value = selected;
+              suggestionBox.style.display = "none";
+              finalizeInput(input, td, selected);
+            }
+          });
+
+          input.addEventListener("change", () => {
+            const val = input.value.trim();
+            if (!wordList.includes(val)) {
+              alert("このワードはリストにありません！");
+              input.value = "";
+              td.style.background = "#ccc";
+              return;
+            }
+            if (usedWords.has(val)) {
+              alert("すでに使用されています！");
+              input.value = "";
+              td.style.background = "#ccc";
+              return;
+            }
+            finalizeInput(input, td, val);
+          });
 
           wrapper.appendChild(input);
+          wrapper.appendChild(suggestionBox);
           td.appendChild(wrapper);
-          createAutocomplete(input, td);
         }
 
         tr.appendChild(td);
@@ -210,18 +197,42 @@
       table.appendChild(tr);
     }
 
-    function randomFill() {
-      const used = new Set();
-      const inputs = document.querySelectorAll("input");
+    function updateSuggestions(input, suggestionBox) {
+      const val = input.value.trim();
+      const currentUsed = Array.from(document.querySelectorAll("input")).map(i => i.value.trim());
+      suggestionBox.innerHTML = "";
 
-      inputs.forEach(input => {
-        let choice;
-        do {
-          choice = wordList[Math.floor(Math.random() * wordList.length)];
-        } while (used.has(choice));
-        used.add(choice);
-        input.value = choice;
-        input.dispatchEvent(new Event("input"));
+      wordList.forEach(word => {
+        if (!currentUsed.includes(word)) {
+          const div = document.createElement("div");
+          div.textContent = word;
+          suggestionBox.appendChild(div);
+        }
+      });
+
+      suggestionBox.style.display = "block";
+    }
+
+    function finalizeInput(input, td, val) {
+      usedWords.add(val);
+      if (rainbowWords.includes(val)) {
+        td.style.background = "linear-gradient(135deg, #f4d7f4, #d6c6e1, #c0d4f7, #bde5c8, #fffabf, #ffe4b5, #f7b3b3)";
+      } else {
+        td.style.background = "#ccc";
+      }
+    }
+
+    function randomFill() {
+      const inputs = Array.from(document.querySelectorAll("input"));
+      const available = wordList.filter(word => !usedWords.has(word));
+      const shuffled = available.sort(() => Math.random() - 0.5).slice(0, inputs.length);
+      usedWords.clear();
+
+      inputs.forEach((input, idx) => {
+        const td = input.closest("td");
+        const val = shuffled[idx];
+        input.value = val;
+        finalizeInput(input, td, val);
       });
     }
 
@@ -229,8 +240,9 @@
       const inputs = document.querySelectorAll("input");
       inputs.forEach(input => {
         input.value = "";
-        input.dispatchEvent(new Event("input"));
+        input.closest("td").style.background = "#ccc";
       });
+      usedWords.clear();
     }
   </script>
 </body>
