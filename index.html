@@ -2,173 +2,177 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>ビンゴ</title>
   <style>
     body {
+      background-color: #A5A051; /* 深い抹茶色 */
       margin: 0;
       font-family: sans-serif;
-      background-color: #A5A051; /* 深い抹茶色 */
       text-align: center;
     }
     h1 {
       color: white;
-      font-size: 5vmin;
-      margin: 1vh 0;
+      padding: 1rem;
     }
     table {
-      margin: 2vh auto;
       width: 90vmin;
       height: 90vmin;
+      margin: auto;
       border-collapse: collapse;
       table-layout: fixed;
     }
     td {
-      border: 2px solid #ccc;
-      background-color: gray;
-      padding: 0;
+      border: 2px solid white;
+      aspect-ratio: 1 / 1;
       position: relative;
-    }
-    .cell-input {
-      width: 85%;
-      height: 85%;
-      font-size: 2vmin;
-      box-sizing: border-box;
-      resize: none;
-      overflow-wrap: break-word;
-      white-space: normal;
-      padding: 0.2em;
-      margin: auto;
-      display: block;
-      text-align: center;
-    }
-    .rainbow {
-      background: linear-gradient(45deg, red, orange, yellow, green, blue, indigo, violet);
-      color: white;
+      background-color: #ccc;
     }
     .free-cell {
-      background-color: #b3ab8e !important;
+      background-image: url("images/star.png");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-color: #f5f5dc; /* 利休白茶 */
     }
     .cell-content {
-      font-size: 3vmin;
-      font-weight: bold;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 5%;
+      box-sizing: border-box;
+    }
+    .cell-content input {
+      width: 85%;
+      height: 85%;
+      box-sizing: border-box;
+      font-size: 2vmin;
       text-align: center;
-      line-height: 100%;
+      resize: none;
+    }
+    .rainbow {
+      background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet);
+      color: white;
     }
     .button-container {
-      margin-top: 2vh;
+      margin-top: 1rem;
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
     }
-    .control-button {
-      font-size: 2.5vmin;
-      padding: 0.8em 1.5em;
-      margin: 0 1em;
-      background-color: #2e4e1e;
-      color: white;
+    button {
+      padding: 0.6rem 1.2rem;
+      font-size: 1rem;
       border: none;
-      border-radius: 0.5em;
+      border-radius: 8px;
+      background-color: #2e4e1e; /* 濃い緑 */
+      color: white;
       cursor: pointer;
-    }
-    datalist option {
-      font-size: 2vmin;
     }
   </style>
 </head>
 <body>
   <h1>ビンゴ</h1>
-  <table id="bingo-table">
-    <!-- ビンゴ表の行を生成 -->
-    <script>
-      const wordList = [
-        "さくら", "ふじさん", "かぶき", "まっちゃ", "げいしゃ",
-        "しょうゆ", "たたみ", "にんじゃ", "すもう", "はなみ",
-        "まんが", "しんかんせん", "さむらい", "けんどう", "きもの",
-        "こけし", "らーめん", "たこやき", "わがし", "おにぎり",
-        "こま", "はし", "おちゃ", "わしょく", "しぶや"
-      ];
-      const specialWords = ["さくら", "にんじゃ", "おちゃ", "しぶや", "まんが"];
-      document.write("<tbody>");
-      for (let row = 0; row < 5; row++) {
-        document.write("<tr>");
-        for (let col = 0; col < 5; col++) {
-          const isCenter = row === 2 && col === 2;
-           if (isCenter) {
-              document.write(`
-                <td class="cell free-cell" data-row="${row}" data-col="${col}">
-                  <div class="cell-content">
-                    <img src="rainbowranbu.png" alt="Free" />
-                  </div>
-                </td>
-              `);
-          } else {
-            document.write(`
-              <td class="cell" data-row="${row}" data-col="${col}">
-                <input list="wordlist" class="cell-input" placeholder="未選択" />
-              </td>
-            `);
-          }
-        }
-        document.write("</tr>");
-      }
-      document.write("</tbody>");
-    </script>
+  <table id="bingo">
+    <tbody></tbody>
   </table>
 
   <div class="button-container">
-    <button class="control-button" onclick="fillRandom()">ランダム配置</button>
-    <button class="control-button" onclick="resetGrid()">リセット</button>
+    <button onclick="randomFill()">ランダム配置</button>
+    <button onclick="resetBoard()">リセット</button>
   </div>
 
-  <datalist id="wordlist">
-    <script>
-      wordList.forEach(word => {
-        document.write(`<option value="${word}">`);
-      });
-    </script>
-  </datalist>
-
   <script>
-    const inputs = [];
+    // 編集可能なビンゴワード一覧（ここを書き換えてOK）
+    const wordList = [
+      "富士山", "桜", "畳", "抹茶", "着物",
+      "忍者", "侍", "温泉", "盆栽", "和菓子",
+      "鳥居", "祭り", "刀", "お箸", "日本酒",
+      "神社", "茶道", "寿司", "紅葉", "庭園",
+      "折り紙", "雪景色", "太鼓", "歌舞伎", "俳句"
+    ];
 
-    document.querySelectorAll(".cell-input").forEach(input => {
-      inputs.push(input);
-      input.addEventListener("input", () => {
-        const val = input.value.trim();
-        const parent = input.closest("td");
+    // 虹色になる単語（ここで指定）
+    const rainbowWords = ["抹茶", "桜", "忍者", "寿司", "富士山"];
 
-        if (specialWords.includes(val)) {
-          parent.classList.add("rainbow");
+    const table = document.querySelector("#bingo tbody");
+
+    // 5x5 のビンゴ表を生成
+    for (let row = 0; row < 5; row++) {
+      const tr = document.createElement("tr");
+      for (let col = 0; col < 5; col++) {
+        const td = document.createElement("td");
+        td.dataset.row = row;
+        td.dataset.col = col;
+        if (row === 2 && col === 2) {
+          td.classList.add("free-cell");
         } else {
-          parent.classList.remove("rainbow");
+          const wrapper = document.createElement("div");
+          wrapper.className = "cell-content";
+
+          const input = document.createElement("input");
+          input.setAttribute("list", "word-options");
+          input.placeholder = "未選択";
+
+          input.addEventListener("input", () => {
+            const val = input.value.trim();
+            if (val === "") {
+              td.style.background = "#ccc";
+              return;
+            }
+
+            if (rainbowWords.includes(val)) {
+              td.style.background = "linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet)";
+              input.style.color = "white";
+            } else if (!wordList.includes(val)) {
+              alert("このワードはリストにありません！");
+              input.value = "";
+              td.style.background = "#ccc";
+            } else {
+              td.style.background = "#ccc";
+              input.style.color = "black";
+            }
+          });
+
+          wrapper.appendChild(input);
+          td.appendChild(wrapper);
         }
+        tr.appendChild(td);
+      }
+      table.appendChild(tr);
+    }
 
-        // 入力後に候補外だったら警告
-        if (val && !wordList.includes(val)) {
-          input.setCustomValidity("このワードはリストにありません");
-        } else {
-          input.setCustomValidity("");
-        }
-
-        input.reportValidity();
-      });
-
-      // 空でも選択肢を表示させたい
-      input.addEventListener("focus", () => {
-        input.value = "";
-        input.dispatchEvent(new Event("input"));
-      });
+    // datalist を追加（リスト入力補完）
+    const dataList = document.createElement("datalist");
+    dataList.id = "word-options";
+    wordList.forEach(word => {
+      const option = document.createElement("option");
+      option.value = word;
+      dataList.appendChild(option);
     });
+    document.body.appendChild(dataList);
 
-    function fillRandom() {
-      const shuffled = [...wordList].sort(() => Math.random() - 0.5);
-      let i = 0;
+    // ランダム配置
+    function randomFill() {
+      const used = new Set();
+      const inputs = document.querySelectorAll("input");
+
       inputs.forEach(input => {
-        let word = shuffled[i++];
-        input.value = word;
+        let choice;
+        do {
+          choice = wordList[Math.floor(Math.random() * wordList.length)];
+        } while (used.has(choice));
+        used.add(choice);
+        input.value = choice;
         input.dispatchEvent(new Event("input"));
       });
     }
 
-    function resetGrid() {
+    // リセット
+    function resetBoard() {
+      const inputs = document.querySelectorAll("input");
       inputs.forEach(input => {
         input.value = "";
         input.dispatchEvent(new Event("input"));
