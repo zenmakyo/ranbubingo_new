@@ -124,17 +124,19 @@
             }
 
             if (rainbowWords.includes(val)) {
-              td.style.background = "linear-gradient(135deg,
-                rgba(238, 130, 238, 0.4),  /* violet */
-                rgba(75, 0, 130, 0.4),     /* indigo */
-                rgba(0, 0, 255, 0.4),      /* blue */
-                rgba(0, 128, 0, 0.4),      /* green */
-                rgba(255, 255, 0, 0.4),    /* yellow */
-                rgba(255, 165, 0, 0.4),    /* orange */
-                rgba(255, 0, 0, 0.4)       /* red */)";
-              input.style.color = "black";
-              input.style.backgroundColor = "white";
-            } else if (!wordList.includes(val)) {
+              if (rainbowWords.includes(val)) {
+                td.style.background = `linear-gradient(135deg,
+                rgba(238, 130, 238, 0.4),
+                rgba(75, 0, 130, 0.4),
+                rgba(0, 0, 255, 0.4),
+                rgba(0, 128, 0, 0.4),
+                rgba(255, 255, 0, 0.4),
+                rgba(255, 165, 0, 0.4),
+                rgba(255, 0, 0, 0.4)
+                )`;
+  input.style.backgroundColor = "white";
+  input.style.color = "black";
+} else if (!wordList.includes(val)) {
               alert("このワードはリストにありません！");
               input.value = "";
               td.style.background = "#ccc";
