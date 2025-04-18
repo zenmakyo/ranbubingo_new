@@ -44,19 +44,40 @@
     .cell-content {
       width: 100%;
       height: 100%;
+      position: relative;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 5%;
+    }
+    .dropdown-wrapper {
+      width: 90%;
+      position: relative;
+    }
+    .custom-input {
+      width: 100%;
+      font-size: 2vmin;
+      padding: 0.2em;
+      text-align: center;
       box-sizing: border-box;
     }
-    .cell-content input {
-      width: 85%;
-      height: 85%;
-      box-sizing: border-box;
+    .suggestions {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      max-height: 30vmin;
+      overflow-y: auto;
+      background: white;
+      border: 1px solid #999;
+      z-index: 10;
       font-size: 2vmin;
-      text-align: center;
-      resize: none;
+    }
+    .suggestions div {
+      padding: 0.3em;
+      cursor: pointer;
+    }
+    .suggestions div:hover {
+      background-color: #eee;
     }
     .button-container {
       margin-top: 1rem;
@@ -95,6 +116,7 @@
       "折り紙", "雪景色", "太鼓", "歌舞伎", "俳句"
     ];
     const rainbowWords = ["抹茶", "桜", "忍者", "寿司", "富士山"];
+    const usedWords = new Set();
 
     const table = document.querySelector("#bingo tbody");
 
@@ -102,35 +124,60 @@
       const tr = document.createElement("tr");
       for (let col = 0; col < 5; col++) {
         const td = document.createElement("td");
-        td.dataset.row = row;
-        td.dataset.col = col;
-
         if (row === 2 && col === 2) {
           td.classList.add("free-cell");
         } else {
           const wrapper = document.createElement("div");
           wrapper.className = "cell-content";
 
+          const dropdownWrapper = document.createElement("div");
+          dropdownWrapper.className = "dropdown-wrapper";
+
           const input = document.createElement("input");
-          input.setAttribute("list", "word-options");
+          input.type = "text";
+          input.className = "custom-input";
           input.placeholder = "未選択";
+
+          const suggestionBox = document.createElement("div");
+          suggestionBox.className = "suggestions";
+          suggestionBox.style.display = "none";
 
           input.addEventListener("input", () => {
             const val = input.value.trim();
-            if (rainbowWords.includes(val)) {
-              td.style.background = "linear-gradient(135deg, #f4d7f4, #d6c6e1, #c0d4f7, #bde5c8, #fffabf, #ffe4b5, #f7b3b3)";
-              input.style.backgroundColor = "white";
-              input.style.color = "black";
+            suggestionBox.innerHTML = "";
+            if (val) {
+              const filtered = wordList.filter(
+                w => w.includes(val) && (!usedWords.has(w) || input.value === w)
+              );
+              filtered.forEach(word => {
+                const option = document.createElement("div");
+                option.textContent = word;
+                option.addEventListener("click", () => {
+                  input.value = word;
+                  suggestionBox.style.display = "none";
+                  input.dispatchEvent(new Event("change"));
+                });
+                suggestionBox.appendChild(option);
+              });
+              suggestionBox.style.display = filtered.length ? "block" : "none";
             } else {
-              td.style.background = "#ccc";
-              input.style.backgroundColor = "white";
-              input.style.color = "black";
+              suggestionBox.style.display = "none";
             }
+          });
+
+          input.addEventListener("focus", () => {
+            input.dispatchEvent(new Event("input"));
+          });
+
+          input.addEventListener("blur", () => {
+            setTimeout(() => { suggestionBox.style.display = "none"; }, 100);
           });
 
           input.addEventListener("change", () => {
             const val = input.value.trim();
             if (val === "") {
+              usedWords.delete(input.dataset.prev || "");
+              input.dataset.prev = "";
               td.style.background = "#ccc";
               return;
             }
@@ -140,35 +187,37 @@
               td.style.background = "#ccc";
               return;
             }
-            if (!rainbowWords.includes(val)) {
+            if (usedWords.has(val) && input.dataset.prev !== val) {
+              alert("このワードはすでに選択済みです！");
+              input.value = "";
               td.style.background = "#ccc";
-              input.style.backgroundColor = "white";
-              input.style.color = "black";
+              return;
+            }
+
+            usedWords.delete(input.dataset.prev || "");
+            usedWords.add(val);
+            input.dataset.prev = val;
+
+            if (rainbowWords.includes(val)) {
+              td.style.background = "linear-gradient(135deg, #f4d7f4, #d6c6e1, #c0d4f7, #bde5c8, #fffabf, #ffe4b5, #f7b3b3)";
+            } else {
+              td.style.background = "#ccc";
             }
           });
 
-          wrapper.appendChild(input);
+          dropdownWrapper.appendChild(input);
+          dropdownWrapper.appendChild(suggestionBox);
+          wrapper.appendChild(dropdownWrapper);
           td.appendChild(wrapper);
         }
-
         tr.appendChild(td);
       }
       table.appendChild(tr);
     }
 
-    const dataList = document.createElement("datalist");
-    dataList.id = "word-options";
-    wordList.forEach(word => {
-      const option = document.createElement("option");
-      option.value = word;
-      dataList.appendChild(option);
-    });
-    document.body.appendChild(dataList);
-
     function randomFill() {
       const used = new Set();
-      const inputs = document.querySelectorAll("input");
-
+      const inputs = document.querySelectorAll(".custom-input");
       inputs.forEach(input => {
         let choice;
         do {
@@ -176,15 +225,17 @@
         } while (used.has(choice));
         used.add(choice);
         input.value = choice;
-        input.dispatchEvent(new Event("input"));
+        input.dispatchEvent(new Event("change"));
       });
     }
 
     function resetBoard() {
-      const inputs = document.querySelectorAll("input");
+      usedWords.clear();
+      const inputs = document.querySelectorAll(".custom-input");
       inputs.forEach(input => {
         input.value = "";
-        input.dispatchEvent(new Event("input"));
+        input.dataset.prev = "";
+        input.dispatchEvent(new Event("change"));
       });
     }
   </script>
