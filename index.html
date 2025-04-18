@@ -7,18 +7,19 @@
   <link href="https://fonts.googleapis.com/css2?family=Zen+Kurenaido&display=swap" rel="stylesheet">
   <style>
     body {
-      background-color: #3e4d2c;
+      background-color: #98AB6F;
       margin: 0;
-      font-family: 'Zen Kurenaido', sans-serif;
+      font-family: sans-serif;
       text-align: center;
-      color: white;
     }
     h1 {
+      font-family: 'Zen Kurenaido', sans-serif;
       font-size: 3.5rem;
+      color: white;
       -webkit-text-stroke: 3px black;
       paint-order: stroke fill;
       font-weight: bold;
-      margin: 1rem 0;
+      padding: 1rem;
     }
     table {
       width: 90vmin;
@@ -29,73 +30,58 @@
     }
     td {
       border: 2px solid white;
-      position: relative;
       aspect-ratio: 1 / 1;
+      position: relative;
       background-color: #ccc;
     }
     .free-cell {
-      background-image: url('rainbowranbu.png');
+      background-image: url("rainbowranbu.png");
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
+      background-color: #f5f5dc;
     }
-    .cell-inner {
+    .cell-content {
       width: 100%;
       height: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
-      position: relative;
-    }
-    textarea {
-      width: 95%;
-      height: 95%;
-      resize: none;
-      font-size: 2vmin;
-      text-align: center;
-      font-family: inherit;
-      overflow-wrap: break-word;
+      padding: 5%;
       box-sizing: border-box;
     }
-    .options {
-      position: absolute;
-      top: 100%;
-      left: 0;
-      right: 0;
-      background: white;
-      color: black;
-      z-index: 10;
-      max-height: 25vmin;
-      overflow-y: auto;
+    .cell-content input {
+      width: 85%;
+      height: 85%;
+      box-sizing: border-box;
       font-size: 2vmin;
-      display: none;
+      text-align: center;
+      resize: none;
     }
-    .option-item {
-      padding: 4px;
-      cursor: pointer;
-    }
-    .option-item:hover {
-      background: #eee;
-    }
-    .buttons {
+    .button-container {
       margin-top: 1rem;
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
     }
     button {
       padding: 0.6rem 1.2rem;
       font-size: 1rem;
-      border-radius: 8px;
-      background: #2e4e1e;
-      color: white;
       border: none;
+      border-radius: 8px;
+      background-color: #2e4e1e;
+      color: white;
       cursor: pointer;
-      margin: 0 1rem;
     }
   </style>
 </head>
 <body>
   <h1>乱舞ビンゴ</h1>
-  <table id="bingo"></table>
-  <div class="buttons">
+  <table id="bingo">
+    <tbody></tbody>
+  </table>
+
+  <div class="button-container">
     <button onclick="randomFill()">ランダム配置</button>
     <button onclick="resetBoard()">リセット</button>
   </div>
@@ -109,112 +95,98 @@
       "折り紙", "雪景色", "太鼓", "歌舞伎", "俳句"
     ];
     const rainbowWords = ["抹茶", "桜", "忍者", "寿司", "富士山"];
-    let usedWords = new Set();
 
-    const table = document.getElementById("bingo");
+    const table = document.querySelector("#bingo tbody");
 
-    function createTable() {
-      for (let row = 0; row < 5; row++) {
-        const tr = document.createElement("tr");
-        for (let col = 0; col < 5; col++) {
-          const td = document.createElement("td");
-          if (row === 2 && col === 2) {
-            td.classList.add("free-cell");
-          } else {
-            const wrapper = document.createElement("div");
-            wrapper.className = "cell-inner";
+    for (let row = 0; row < 5; row++) {
+      const tr = document.createElement("tr");
+      for (let col = 0; col < 5; col++) {
+        const td = document.createElement("td");
+        td.dataset.row = row;
+        td.dataset.col = col;
 
-            const textarea = document.createElement("textarea");
-            const options = document.createElement("div");
-            options.className = "options";
+        if (row === 2 && col === 2) {
+          td.classList.add("free-cell");
+        } else {
+          const wrapper = document.createElement("div");
+          wrapper.className = "cell-content";
 
-            textarea.addEventListener("input", () => {
-              const val = textarea.value.trim();
-              options.innerHTML = "";
-              if (val === "") {
-                options.style.display = "none";
-                return;
-              }
-              const matches = wordList.filter(w => w.includes(val));
-              matches.forEach(word => {
-                const div = document.createElement("div");
-                div.className = "option-item";
-                div.textContent = word;
-                div.onclick = () => {
-                  if (usedWords.has(word)) {
-                    alert("このワードはすでに選択済みです！");
-                    return;
-                  }
-                  textarea.value = word;
-                  usedWords.add(word);
-                  options.style.display = "none";
-                  updateCellColor(td, word);
-                };
-                options.appendChild(div);
-              });
-              options.style.display = matches.length ? "block" : "none";
-            });
+          const input = document.createElement("input");
+          input.setAttribute("list", "word-options");
+          input.placeholder = "未選択";
 
-            textarea.addEventListener("change", () => {
-              const val = textarea.value.trim();
-              if (!wordList.includes(val)) {
-                alert("このワードはリストにありません！");
-                textarea.value = "";
-                td.style.background = "#ccc";
-                return;
-              }
-              if (usedWords.has(val)) {
-                alert("このワードはすでに選択済みです！");
-                textarea.value = "";
-                td.style.background = "#ccc";
-                return;
-              }
-              usedWords.add(val);
-              updateCellColor(td, val);
-            });
+          input.addEventListener("input", () => {
+            const val = input.value.trim();
+            if (rainbowWords.includes(val)) {
+              td.style.background = "linear-gradient(135deg, #f4d7f4, #d6c6e1, #c0d4f7, #bde5c8, #fffabf, #ffe4b5, #f7b3b3)";
+              input.style.backgroundColor = "white";
+              input.style.color = "black";
+            } else {
+              td.style.background = "#ccc";
+              input.style.backgroundColor = "white";
+              input.style.color = "black";
+            }
+          });
 
-            wrapper.appendChild(textarea);
-            wrapper.appendChild(options);
-            td.appendChild(wrapper);
-          }
-          tr.appendChild(td);
+          input.addEventListener("change", () => {
+            const val = input.value.trim();
+            if (val === "") {
+              td.style.background = "#ccc";
+              return;
+            }
+            if (!wordList.includes(val)) {
+              alert("このワードはリストにありません！");
+              input.value = "";
+              td.style.background = "#ccc";
+              return;
+            }
+            if (!rainbowWords.includes(val)) {
+              td.style.background = "#ccc";
+              input.style.backgroundColor = "white";
+              input.style.color = "black";
+            }
+          });
+
+          wrapper.appendChild(input);
+          td.appendChild(wrapper);
         }
-        table.appendChild(tr);
+
+        tr.appendChild(td);
       }
+      table.appendChild(tr);
     }
 
-    function updateCellColor(cell, word) {
-      if (rainbowWords.includes(word)) {
-        cell.style.background = "linear-gradient(135deg, #f4d7f4, #d6c6e1, #c0d4f7, #bde5c8, #fffabf, #ffe4b5, #f7b3b3)";
-      } else {
-        cell.style.background = "#ccc";
-      }
-    }
+    const dataList = document.createElement("datalist");
+    dataList.id = "word-options";
+    wordList.forEach(word => {
+      const option = document.createElement("option");
+      option.value = word;
+      dataList.appendChild(option);
+    });
+    document.body.appendChild(dataList);
 
     function randomFill() {
-      const textareas = table.querySelectorAll("textarea");
-      const shuffled = [...wordList].sort(() => Math.random() - 0.5);
-      usedWords = new Set();
-      let index = 0;
-      textareas.forEach(t => {
-        const word = shuffled[index++];
-        t.value = word;
-        usedWords.add(word);
-        updateCellColor(t.closest("td"), word);
+      const used = new Set();
+      const inputs = document.querySelectorAll("input");
+
+      inputs.forEach(input => {
+        let choice;
+        do {
+          choice = wordList[Math.floor(Math.random() * wordList.length)];
+        } while (used.has(choice));
+        used.add(choice);
+        input.value = choice;
+        input.dispatchEvent(new Event("input"));
       });
     }
 
     function resetBoard() {
-      const textareas = table.querySelectorAll("textarea");
-      textareas.forEach(t => {
-        t.value = "";
-        const td = t.closest("td");
-        td.style.background = "#ccc";
+      const inputs = document.querySelectorAll("input");
+      inputs.forEach(input => {
+        input.value = "";
+        input.dispatchEvent(new Event("input"));
       });
-      usedWords = new Set();
     }
-
-    createTable();
   </script>
 </body>
 </html>
