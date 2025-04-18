@@ -78,15 +78,13 @@
       "ライチ", "パッションフルーツ", "アボカド", "ラズベリー", "オレンジ", "ネーブル", "カキ", "イチジク"
     ];
 
-    const specialWords = ["バナナ", "ぶどう", "すいか"]; // 背景色を変える単語
-
+    const specialWords = ["バナナ", "ぶどう", "すいか"]; // 特別な色にする単語
     const usedWords = new Set();
     const wordSelect = document.getElementById("wordSelect");
     const inputArea = document.getElementById("inputArea");
     const table = document.getElementById("bingo").getElementsByTagName("tbody")[0];
     let currentCell = null;
 
-    // セル生成
     for (let i = 0; i < 5; i++) {
       const tr = document.createElement("tr");
       for (let j = 0; j < 5; j++) {
@@ -145,11 +143,10 @@
       currentCell.textContent = value;
       usedWords.add(value);
 
-      // 背景色設定
       if (specialWords.includes(value)) {
         currentCell.style.backgroundColor = "#90caf9";  // 色A（水色）
       } else {
-        currentCell.style.backgroundColor = "#f0f0f0";  // 色B（既定）
+        currentCell.style.backgroundColor = "#f0f0f0";  // 色B（通常）
       }
 
       hideInputArea();
