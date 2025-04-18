@@ -1,255 +1,206 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>ビンゴ（虹色ワード対応）</title>
+  <meta charset="UTF-8">
+  <title>ビンゴ</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body {
-      font-family: sans-serif;
-      background-color: #d6e5b0;
+    html, body {
       margin: 0;
-      padding: 1em;
-      text-align: center;
+      padding: 0;
+      background-color: #d8c690; /* 畳っぽい背景 */
+      font-family: sans-serif;
     }
     table {
+      width: 90vmin;
+      height: 90vmin;
+      margin: 2vmin auto;
       border-collapse: collapse;
-      margin: auto;
-      width: 90vw;
-      max-width: 500px;
       table-layout: fixed;
     }
     td {
-      border: 2px solid #333;
-      width: 20%;
-      height: 0;
-      padding-bottom: 20%;
+      border: 2px solid #555;
       position: relative;
-      background-color: white;
-    }
-    .center-free {
-      background-color: gold;
-      height: 0;
-      padding-bottom: 20%;
-      position: relative;
-    }
-    .input-wrapper {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 5%;
-      box-sizing: border-box;
-    }
-    textarea.cellInput {
-      width: 100%;
-      height: 100%;
-      font-size: 1em;
       text-align: center;
-      border: 1px solid #aaa;
-      border-radius: 6px;
-      resize: none;
-      overflow: hidden;
-      white-space: pre-wrap;
-      word-wrap: break-word;
-      box-sizing: border-box;
-      padding: 0.2em;
+      vertical-align: middle;
     }
-
-    /* 🎨 カラーパターン */
-    td.usedDefault { background-color: #e0e0e0; } /* 基本グレー */
-    td.usedRainbow1 { background-color: #ff9999; } /* 赤 */
-    td.usedRainbow2 { background-color: #ffcc99; } /* 橙 */
-    td.usedRainbow3 { background-color: #ffff99; } /* 黄 */
-    td.usedRainbow4 { background-color: #ccff99; } /* 緑 */
-    td.usedRainbow5 { background-color: #99ffff; } /* 水色 */
-    td.usedRainbow6 { background-color: #99ccff; } /* 青 */
-    td.usedRainbow7 { background-color: #cc99ff; } /* 紫 */
-
+    .cell-input {
+      width: 90%;
+      box-sizing: border-box;
+      font-size: 2vmin;
+      padding: 0.2em;
+      margin: auto;
+      display: block;
+    }
+    .center-cell {
+      font-size: 3vmin;
+    }
+    .usedDefault {
+      background-color: #ccc;
+    }
+    .rainbow-bg {
+      background: linear-gradient(135deg, red, orange, yellow, green, cyan, blue, violet);
+      color: white;
+    }
     .suggestions {
       position: absolute;
       top: 100%;
       left: 0;
-      width: 100%;
+      right: 0;
       background: white;
-      border: 1px solid #ccc;
-      max-height: 100px;
-      overflow-y: auto;
+      border: 1px solid #aaa;
       z-index: 10;
-      display: none;
+      max-height: 120px;
+      overflow-y: auto;
     }
-    .suggestions div {
-      padding: 6px;
+    .suggestion-item {
+      padding: 4px;
       cursor: pointer;
-      text-align: left;
     }
-    .suggestions div:hover {
-      background-color: #eee;
+    .suggestion-item:hover {
+      background: #eee;
     }
-    .button-row {
-      margin-top: 20px;
-      display: flex;
-      justify-content: center;
-      gap: 20px;
+    .controls {
+      text-align: center;
+      margin-bottom: 10px;
     }
-    button {
-      padding: 10px 20px;
-      font-size: 1em;
+    .controls button {
+      font-size: 2vmin;
+      margin: 0 1em;
+      padding: 0.5em 1.5em;
+      border-radius: 6px;
       border: none;
-      border-radius: 8px;
+      background: #666;
       color: white;
       cursor: pointer;
     }
-    #randomBtn { background-color: #88a05f; }
-    #resetBtn { background-color: #c75b4a; }
-    #randomBtn:hover { background-color: #7a9155; }
-    #resetBtn:hover { background-color: #b04e3f; }
   </style>
 </head>
 <body>
-  <h2>ビンゴ（虹色ワード対応）</h2>
-  <table id="bingo"><tbody></tbody></table>
-  <div class="button-row">
-    <button id="randomBtn">ランダム配置</button>
-    <button id="resetBtn">リセット</button>
-  </div>
 
-  <script>
-    // 📝 編集できる単語リスト
-    const words = [
-      "りんご", "バナナ", "みかん", "ぶどう", "すいか", "もも", "パイナップル", "キウイ", "レモン", "メロン",
-      "なし", "さくらんぼ", "グレープフルーツ", "ブルーベリー", "ストロベリー", "マンゴー", "ドリアン",
-      "ライチ", "パッションフルーツ", "アボカド", "ラズベリー", "オレンジ", "ネーブル", "カキ", "イチジク"
-    ];
+<div class="controls">
+  <button onclick="fillRandom()">ランダム配置</button>
+  <button onclick="resetBoard()">リセット</button>
+</div>
 
-    // 🌈 虹色になる特別な単語
-    const rainbowWords = ["バナナ", "すいか", "キウイ", "ブルーベリー", "マンゴー", "レモン", "さくらんぼ"];
+<table id="bingo">
+  <!-- JSでセルを作成 -->
+</table>
 
-    // 🌈 色を順番に使うための配列
-    const rainbowClasses = [
-      "usedRainbow1", "usedRainbow2", "usedRainbow3",
-      "usedRainbow4", "usedRainbow5", "usedRainbow6", "usedRainbow7"
-    ];
-    let rainbowIndex = 0;
+<script>
+  // 🔤 編集しやすいワードリスト（自由に変更OK）
+  const words = [
+    "富士山", "桜", "忍者", "寿司", "着物", "侍", "歌舞伎", "温泉", "神社", "祭り",
+    "畳", "茶道", "盆栽", "和菓子", "折り紙", "刀", "花火", "餅", "縁側", "こたつ",
+    "おにぎり", "味噌汁", "浮世絵", "将軍", "抹茶"
+  ];
 
-    const usedWords = new Set();
-    const inputs = [];
-    const table = document.querySelector("#bingo tbody");
+  // 🌈 虹色にしたいワード
+  const rainbowWords = ["富士山", "桜", "忍者", "寿司"];
 
-    for (let i = 0; i < 5; i++) {
-      const tr = document.createElement("tr");
-      for (let j = 0; j < 5; j++) {
-        const td = document.createElement("td");
+  const table = document.getElementById("bingo");
 
-        if (i === 2 && j === 2) {
-          td.className = "center-free";
-          const wrapper = document.createElement("div");
-          wrapper.className = "input-wrapper";
-          const star = document.createElement("div");
-          star.textContent = "⭐️";
-          star.style.fontSize = "2em";
-          wrapper.appendChild(star);
-          td.appendChild(wrapper);
-          tr.appendChild(td);
-          continue;
-        }
+  for (let i = 0; i < 5; i++) {
+    const row = document.createElement("tr");
+    for (let j = 0; j < 5; j++) {
+      const td = document.createElement("td");
 
-        const wrapper = document.createElement("div");
-        wrapper.className = "input-wrapper";
-
-        const input = document.createElement("textarea");
-        input.className = "cellInput";
+      if (i === 2 && j === 2) {
+        td.innerHTML = '<div class="center-cell">⭐</div>';
+      } else {
+        const input = document.createElement("input");
+        input.type = "text";
+        input.className = "cell-input";
         input.placeholder = "未選択";
-        input.rows = 1;
 
         const suggestionBox = document.createElement("div");
         suggestionBox.className = "suggestions";
+        suggestionBox.style.display = "none";
 
-        const updateSuggestions = () => {
-          const value = input.value.trim();
+        input.addEventListener("input", () => {
+          const val = input.value.toLowerCase();
           suggestionBox.innerHTML = "";
-          const filtered = words.filter(word =>
-            word.includes(value) && !usedWords.has(word)
-          );
-          if (filtered.length === 0) {
+          if (!val) {
             suggestionBox.style.display = "none";
             return;
           }
-          filtered.forEach(word => {
-            const div = document.createElement("div");
-            div.textContent = word;
-            div.onclick = () => {
-              input.value = word;
-              input.title = word;
-              suggestionBox.style.display = "none";
-              if (usedWords.has(word)) {
-                alert("その単語はすでに使われています");
-                input.value = "";
-                td.className = "";
-                return;
-              }
-              if (rainbowWords.includes(word)) {
-                td.className = rainbowClasses[rainbowIndex % rainbowClasses.length];
-                rainbowIndex++;
-              } else {
-                td.className = "usedDefault";
-              }
-              usedWords.add(word);
-            };
-            suggestionBox.appendChild(div);
-          });
-          suggestionBox.style.display = "block";
-        };
 
-        input.addEventListener("input", updateSuggestions);
-        input.addEventListener("focus", updateSuggestions);
-        input.addEventListener("blur", () => {
-          setTimeout(() => suggestionBox.style.display = "none", 200);
+          const filtered = words.filter(w => w.toLowerCase().includes(val));
+          if (filtered.length) {
+            filtered.forEach(w => {
+              const item = document.createElement("div");
+              item.className = "suggestion-item";
+              item.textContent = w;
+              item.onclick = () => {
+                input.value = w;
+                suggestionBox.style.display = "none";
+                updateCellColor(td, w);
+              };
+              suggestionBox.appendChild(item);
+            });
+            suggestionBox.style.display = "block";
+          } else {
+            suggestionBox.style.display = "none";
+          }
         });
 
-        wrapper.appendChild(input);
-        wrapper.appendChild(suggestionBox);
-        td.appendChild(wrapper);
-        tr.appendChild(td);
-        inputs.push({ input, td });
+        input.addEventListener("blur", () => {
+          setTimeout(() => {
+            suggestionBox.style.display = "none";
+            const value = input.value.trim();
+            if (value) {
+              if (!words.includes(value)) {
+                alert("そのワードはありません");
+                input.value = "";
+                td.className = "";
+              } else {
+                updateCellColor(td, value);
+              }
+            }
+          }, 200);
+        });
+
+        td.appendChild(input);
+        td.appendChild(suggestionBox);
       }
-      table.appendChild(tr);
+
+      row.appendChild(td);
     }
+    table.appendChild(row);
+  }
 
-    document.getElementById("randomBtn").onclick = () => {
-      const available = words.filter(w => !usedWords.has(w));
-      const emptyCells = inputs.filter(({ input }) => input.value === "");
-      if (available.length < emptyCells.length) {
-        alert("単語が足りません");
-        return;
-      }
-      const shuffled = available.sort(() => 0.5 - Math.random());
-      emptyCells.forEach(({ input, td }, idx) => {
-        const word = shuffled[idx];
-        input.value = word;
-        input.title = word;
-        if (rainbowWords.includes(word)) {
-          td.className = rainbowClasses[rainbowIndex % rainbowClasses.length];
-          rainbowIndex++;
-        } else {
-          td.className = "usedDefault";
-        }
-        usedWords.add(word);
-      });
-    };
+  function updateCellColor(td, word) {
+    td.className = rainbowWords.includes(word) ? "rainbow-bg" : "usedDefault";
+  }
 
-    document.getElementById("resetBtn").onclick = () => {
-      inputs.forEach(({ input, td }) => {
-        input.value = "";
-        input.title = "";
-        td.className = "";
-      });
-      usedWords.clear();
-      rainbowIndex = 0;
-    };
-  </script>
+  function getAllInputs() {
+    return Array.from(document.querySelectorAll(".cell-input"));
+  }
+
+  function fillRandom() {
+    const pool = [...words];
+    shuffle(pool);
+    getAllInputs().forEach((input, i) => {
+      const word = pool[i] || "";
+      input.value = word;
+      updateCellColor(input.parentElement, word);
+    });
+  }
+
+  function resetBoard() {
+    getAllInputs().forEach(input => {
+      input.value = "";
+      input.parentElement.className = "";
+    });
+  }
+
+  function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+  }
+</script>
+
 </body>
 </html>
