@@ -126,6 +126,7 @@
             if (rainbowWords.includes(val)) {
               td.style.background = "linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet)";
               input.style.color = "white";
+              input.style.backgroundColor = "rgba(0, 0, 0, 0.4)";
             } else if (!wordList.includes(val)) {
               alert("このワードはリストにありません！");
               input.value = "";
