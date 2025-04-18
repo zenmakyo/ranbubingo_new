@@ -9,6 +9,9 @@
       font-family: sans-serif;
       text-align: center;
       padding: 10px;
+      margin: 0;
+      background-color: #d6e5b0; /* 畳色 */
+      color: #333;
     }
 
     table {
@@ -20,27 +23,27 @@
     }
 
     td {
-      width: 20%;
-      padding: 0;
-      aspect-ratio: 1 / 1;
       border: 2px solid #333;
       vertical-align: middle;
       position: relative;
+      padding: 0;
     }
 
     .input-wrapper {
       width: 100%;
       height: 100%;
+      padding: 4px;
       display: flex;
       justify-content: center;
-      align-items: center;
+      align-items: flex-start;
       flex-direction: column;
+      box-sizing: border-box;
       position: relative;
     }
 
     input.cellInput {
       width: 90%;
-      height: 40%;
+      min-height: 2em;
       font-size: clamp(14px, 3vw, 18px);
       text-align: center;
       border: 1px solid #ccc;
@@ -50,9 +53,10 @@
 
     .suggestions {
       position: absolute;
-      top: 60%;
-      width: 90%;
-      max-height: 100px;
+      top: 100%;
+      left: 0;
+      width: 100%;
+      max-height: 120px;
       overflow-y: auto;
       background: white;
       border: 1px solid #ccc;
@@ -62,8 +66,9 @@
     }
 
     .suggestions div {
-      padding: 4px;
+      padding: 6px;
       cursor: pointer;
+      text-align: left;
     }
 
     .suggestions div:hover {
@@ -77,13 +82,56 @@
     td.usedB {
       background-color: #e0e0e0;
     }
+
+    td.center-free {
+      background-color: gold;
+      font-size: 1.8em;
+    }
+
+    .button-row {
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    #randomBtn, #resetBtn {
+      padding: 10px 20px;
+      font-size: 1em;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      color: white;
+    }
+
+    #randomBtn {
+      background-color: #88a05f; /* 抹茶色 */
+    }
+
+    #randomBtn:hover {
+      background-color: #7a9155;
+    }
+
+    #resetBtn {
+      background-color: #c75b4a; /* 椿色 */
+    }
+
+    #resetBtn:hover {
+      background-color: #b04e3f;
+    }
   </style>
 </head>
 <body>
   <h2>スマホ対応ビンゴ</h2>
+
   <table id="bingo">
     <tbody></tbody>
   </table>
+
+  <div class="button-row">
+    <button id="randomBtn">ランダム配置</button>
+    <button id="resetBtn">リセット</button>
+  </div>
 
   <script>
     const words = [
@@ -94,6 +142,7 @@
 
     const specialWords = ["バナナ", "ぶどう", "すいか"];
     const usedWords = new Set();
+    const inputs = [];
 
     const table = document.querySelector("#bingo tbody");
 
@@ -101,6 +150,14 @@
       const tr = document.createElement("tr");
       for (let j = 0; j < 5; j++) {
         const td = document.createElement("td");
+
+        if (i === 2 && j === 2) {
+          td.className = "center-free";
+          td.innerHTML = "⭐️";
+          tr.appendChild(td);
+          continue;
+        }
+
         const wrapper = document.createElement("div");
         wrapper.className = "input-wrapper";
 
@@ -112,18 +169,13 @@
         const suggestionBox = document.createElement("div");
         suggestionBox.className = "suggestions";
 
-        input.addEventListener("input", () => {
+        const updateSuggestions = () => {
           const value = input.value.trim();
           suggestionBox.innerHTML = "";
 
-          if (value === "") {
-            suggestionBox.style.display = "none";
-            return;
-          }
-
-          const filtered = words.filter(
-            w => w.startsWith(value) && !usedWords.has(w)
-          );
+          const filtered = (value === "")
+            ? words.filter(w => !usedWords.has(w))
+            : words.filter(w => w.startsWith(value) && !usedWords.has(w));
 
           if (filtered.length === 0) {
             suggestionBox.style.display = "none";
@@ -151,8 +203,10 @@
           });
 
           suggestionBox.style.display = "block";
-        });
+        };
 
+        input.addEventListener("input", updateSuggestions);
+        input.addEventListener("focus", updateSuggestions);
         input.addEventListener("blur", () => {
           setTimeout(() => {
             suggestionBox.style.display = "none";
@@ -163,9 +217,45 @@
         wrapper.appendChild(suggestionBox);
         td.appendChild(wrapper);
         tr.appendChild(td);
+
+        inputs.push({ input, td });
       }
       table.appendChild(tr);
     }
+
+    // ランダム配置
+    document.getElementById("randomBtn").addEventListener("click", () => {
+      const availableWords = words.filter(w => !usedWords.has(w));
+      const emptyCells = inputs.filter(({ input }) => input.value === "");
+
+      if (availableWords.length < emptyCells.length) {
+        alert("単語が足りません！");
+        return;
+      }
+
+      const shuffled = availableWords.sort(() => 0.5 - Math.random());
+
+      emptyCells.forEach(({ input, td }, idx) => {
+        const word = shuffled[idx];
+        input.value = word;
+        td.className = specialWords.includes(word) ? "usedA" : "usedB";
+        usedWords.add(word);
+      });
+    });
+
+    // リセット
+    document.getElementById("resetBtn").addEventListener("click", () => {
+      inputs.forEach(({ input, td }) => {
+        input.value = "";
+        td.className = "";
+      });
+
+      // 中央だけ戻す
+      const centerTd = document.querySelector("td.center-free");
+      if (centerTd) centerTd.innerHTML = "⭐️";
+
+      usedWords.clear();
+    });
   </script>
 </body>
 </html>
