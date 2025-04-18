@@ -105,8 +105,144 @@
 <body>
   <h1>乱舞ビンゴ</h1>
   <table id="bingo">
-    <tbody></tbody>
+    <tbody id="bingo-body"></tbody>
   </table>
 
   <div class="button-container">
     <button onclick="randomFill()">ランダム配置</button>
+    <button onclick="resetBoard()">リセット</button>
+  </div>
+
+  <script>
+    const wordList = [
+      "富士山", "桜", "畳", "抹茶", "着物",
+      "忍者", "侍", "温泉", "盆栽", "和菓子",
+      "鳥居", "祭り", "刀", "お箸", "日本酒",
+      "神社", "茶道", "寿司", "紅葉", "庭園",
+      "折り紙", "雪景色", "太鼓", "歌舞伎", "俳句"
+    ];
+    const rainbowWords = ["抹茶", "桜", "忍者", "寿司", "富士山"];
+    let usedWords = new Set();
+
+    const tbody = document.getElementById("bingo-body");
+
+    function createBoard() {
+      tbody.innerHTML = "";
+      for (let row = 0; row < 5; row++) {
+        const tr = document.createElement("tr");
+        for (let col = 0; col < 5; col++) {
+          const td = document.createElement("td");
+          if (row === 2 && col === 2) {
+            td.classList.add("free-cell");
+          } else {
+            const wrapper = document.createElement("div");
+            wrapper.className = "cell-content";
+
+            const dropdown = document.createElement("div");
+            dropdown.className = "custom-dropdown";
+
+            const textarea = document.createElement("textarea");
+            const optionsBox = document.createElement("div");
+            optionsBox.className = "dropdown-options";
+            optionsBox.style.display = "none";
+
+            textarea.addEventListener("input", () => {
+              const val = textarea.value.trim();
+              optionsBox.innerHTML = "";
+              if (val !== "") {
+                const filtered = wordList.filter(w => w.includes(val));
+                filtered.forEach(word => {
+                  const option = document.createElement("div");
+                  option.textContent = word;
+                  option.addEventListener("click", () => {
+                    if (usedWords.has(word)) {
+                      alert("このワードはすでに選択済みです！");
+                      return;
+                    }
+                    textarea.value = word;
+                    optionsBox.style.display = "none";
+                    usedWords.add(word);
+                    updateCellColor(td, word, textarea);
+                  });
+                  optionsBox.appendChild(option);
+                });
+                optionsBox.style.display = "block";
+              } else {
+                optionsBox.style.display = "none";
+              }
+            });
+
+            textarea.addEventListener("change", () => {
+              const val = textarea.value.trim();
+              if (val === "") {
+                td.style.background = "#ccc";
+                return;
+              }
+              if (!wordList.includes(val)) {
+                alert("このワードはリストにありません！");
+                textarea.value = "";
+                td.style.background = "#ccc";
+                return;
+              }
+              if (usedWords.has(val)) {
+                alert("このワードはすでに選択済みです！");
+                textarea.value = "";
+                td.style.background = "#ccc";
+                return;
+              }
+              usedWords.add(val);
+              updateCellColor(td, val, textarea);
+            });
+
+            dropdown.appendChild(textarea);
+            dropdown.appendChild(optionsBox);
+            wrapper.appendChild(dropdown);
+            td.appendChild(wrapper);
+          }
+          tr.appendChild(td);
+        }
+        tbody.appendChild(tr);
+      }
+    }
+
+    function updateCellColor(td, word, textarea) {
+      if (rainbowWords.includes(word)) {
+        td.style.background = "linear-gradient(135deg, #f4d7f4, #d6c6e1, #c0d4f7, #bde5c8, #fffabf, #ffe4b5, #f7b3b3)";
+        textarea.style.backgroundColor = "white";
+        textarea.style.color = "black";
+      } else {
+        td.style.background = "#ccc";
+        textarea.style.backgroundColor = "white";
+        textarea.style.color = "black";
+      }
+    }
+
+    function randomFill() {
+      const allCells = document.querySelectorAll("textarea");
+      usedWords = new Set();
+      const shuffled = wordList.slice().sort(() => Math.random() - 0.5);
+      let idx = 0;
+      allCells.forEach(textarea => {
+        const word = shuffled[idx++];
+        usedWords.add(word);
+        textarea.value = word;
+        updateCellColor(textarea.closest("td"), word, textarea);
+      });
+    }
+
+    function resetBoard() {
+      const allCells = document.querySelectorAll("textarea");
+      usedWords = new Set();
+      allCells.forEach(textarea => {
+        textarea.value = "";
+        const td = textarea.closest("td");
+        if (td && !td.classList.contains("free-cell")) {
+          td.style.background = "#ccc";
+        }
+      });
+    }
+
+    createBoard(); // 初期化
+  </script>
+</body>
+</html>
