@@ -7,7 +7,7 @@
   <style>
     body {
       font-family: sans-serif;
-      background-color: #d6e5b0; /* 畳色 */
+      background-color: #d6e5b0;
       margin: 0;
       padding: 1em;
       text-align: center;
@@ -44,7 +44,7 @@
       padding: 5%;
       box-sizing: border-box;
     }
-    input.cellInput {
+    textarea.cellInput {
       width: 100%;
       height: 100%;
       font-size: 1em;
@@ -53,9 +53,10 @@
       border-radius: 6px;
       resize: none;
       overflow: hidden;
-      white-space: normal;
+      white-space: pre-wrap;
       word-wrap: break-word;
       box-sizing: border-box;
+      padding: 0.2em;
     }
     td.usedA { background-color: #90caf9; }
     td.usedB { background-color: #e0e0e0; }
@@ -118,17 +119,6 @@
     const inputs = [];
     const table = document.querySelector("#bingo tbody");
 
-    function adjustFontSize(input) {
-      const len = input.value.length;
-      if (len > 10) {
-        input.style.fontSize = "0.7em";
-      } else if (len > 6) {
-        input.style.fontSize = "0.9em";
-      } else {
-        input.style.fontSize = "1em";
-      }
-    }
-
     for (let i = 0; i < 5; i++) {
       const tr = document.createElement("tr");
       for (let j = 0; j < 5; j++) {
@@ -150,10 +140,10 @@
         const wrapper = document.createElement("div");
         wrapper.className = "input-wrapper";
 
-        const input = document.createElement("input");
-        input.type = "text";
+        const input = document.createElement("textarea");
         input.className = "cellInput";
         input.placeholder = "未選択";
+        input.rows = 1;
 
         const suggestionBox = document.createElement("div");
         suggestionBox.className = "suggestions";
@@ -174,7 +164,6 @@
             div.onclick = () => {
               input.value = word;
               input.title = word;
-              adjustFontSize(input);
               suggestionBox.style.display = "none";
               if (usedWords.has(word)) {
                 alert("その単語はすでに使われています");
@@ -190,11 +179,7 @@
           suggestionBox.style.display = "block";
         };
 
-        input.addEventListener("input", () => {
-          adjustFontSize(input);
-          updateSuggestions();
-        });
-
+        input.addEventListener("input", updateSuggestions);
         input.addEventListener("focus", updateSuggestions);
         input.addEventListener("blur", () => {
           setTimeout(() => suggestionBox.style.display = "none", 200);
@@ -221,7 +206,6 @@
         const word = shuffled[idx];
         input.value = word;
         input.title = word;
-        adjustFontSize(input);
         td.className = specialWords.includes(word) ? "usedA" : "usedB";
         usedWords.add(word);
       });
@@ -232,7 +216,6 @@
         input.value = "";
         input.title = "";
         td.className = "";
-        adjustFontSize(input);
       });
       usedWords.clear();
     };
