@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>ビンゴ</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       font-family: sans-serif;
@@ -12,7 +12,6 @@
       padding: 1em;
       text-align: center;
     }
-
     table {
       border-collapse: collapse;
       margin: auto;
@@ -20,22 +19,20 @@
       max-width: 500px;
       table-layout: fixed;
     }
-
     td {
       border: 2px solid #333;
       width: 20%;
       height: 0;
-      padding-bottom: 20%; /* 正方形にする */
+      padding-bottom: 20%;
       position: relative;
-      vertical-align: middle;
       background-color: white;
     }
-
     .center-free {
       background-color: gold;
-      font-size: 2em;
+      height: 0;
+      padding-bottom: 20%;
+      position: relative;
     }
-
     .input-wrapper {
       position: absolute;
       top: 0; left: 0;
@@ -47,7 +44,6 @@
       padding: 5%;
       box-sizing: border-box;
     }
-
     input.cellInput {
       width: 100%;
       height: 100%;
@@ -61,10 +57,8 @@
       word-wrap: break-word;
       box-sizing: border-box;
     }
-
     td.usedA { background-color: #90caf9; }
     td.usedB { background-color: #e0e0e0; }
-
     .suggestions {
       position: absolute;
       top: 100%;
@@ -77,24 +71,20 @@
       z-index: 10;
       display: none;
     }
-
     .suggestions div {
       padding: 6px;
       cursor: pointer;
       text-align: left;
     }
-
     .suggestions div:hover {
       background-color: #eee;
     }
-
     .button-row {
       margin-top: 20px;
       display: flex;
       justify-content: center;
       gap: 20px;
     }
-
     button {
       padding: 10px 20px;
       font-size: 1em;
@@ -103,19 +93,15 @@
       color: white;
       cursor: pointer;
     }
-
     #randomBtn { background-color: #88a05f; }
     #resetBtn { background-color: #c75b4a; }
-
     #randomBtn:hover { background-color: #7a9155; }
     #resetBtn:hover { background-color: #b04e3f; }
   </style>
 </head>
 <body>
-
   <h2>スマホ対応ビンゴ</h2>
   <table id="bingo"><tbody></tbody></table>
-
   <div class="button-row">
     <button id="randomBtn">ランダム配置</button>
     <button id="resetBtn">リセット</button>
@@ -127,7 +113,6 @@
       "なし", "さくらんぼ", "グレープフルーツ", "ブルーベリー", "ストロベリー", "マンゴー", "ドリアン",
       "ライチ", "パッションフルーツ", "アボカド", "ラズベリー", "オレンジ", "ネーブル", "カキ", "イチジク"
     ];
-
     const specialWords = ["バナナ", "ぶどう", "すいか"];
     const usedWords = new Set();
     const inputs = [];
@@ -151,7 +136,13 @@
 
         if (i === 2 && j === 2) {
           td.className = "center-free";
-          td.textContent = "⭐️";
+          const wrapper = document.createElement("div");
+          wrapper.className = "input-wrapper";
+          const star = document.createElement("div");
+          star.textContent = "⭐️";
+          star.style.fontSize = "2em";
+          wrapper.appendChild(star);
+          td.appendChild(wrapper);
           tr.appendChild(td);
           continue;
         }
@@ -170,16 +161,13 @@
         const updateSuggestions = () => {
           const value = input.value.trim();
           suggestionBox.innerHTML = "";
-
           const filtered = words.filter(word =>
             word.includes(value) && !usedWords.has(word)
           );
-
           if (filtered.length === 0) {
             suggestionBox.style.display = "none";
             return;
           }
-
           filtered.forEach(word => {
             const div = document.createElement("div");
             div.textContent = word;
@@ -188,20 +176,17 @@
               input.title = word;
               adjustFontSize(input);
               suggestionBox.style.display = "none";
-
               if (usedWords.has(word)) {
                 alert("その単語はすでに使われています");
                 input.value = "";
                 td.className = "";
                 return;
               }
-
               td.className = specialWords.includes(word) ? "usedA" : "usedB";
               usedWords.add(word);
             };
             suggestionBox.appendChild(div);
           });
-
           suggestionBox.style.display = "block";
         };
 
@@ -219,7 +204,6 @@
         wrapper.appendChild(suggestionBox);
         td.appendChild(wrapper);
         tr.appendChild(td);
-
         inputs.push({ input, td });
       }
       table.appendChild(tr);
@@ -228,12 +212,10 @@
     document.getElementById("randomBtn").onclick = () => {
       const available = words.filter(w => !usedWords.has(w));
       const emptyCells = inputs.filter(({ input }) => input.value === "");
-
       if (available.length < emptyCells.length) {
         alert("単語が足りません");
         return;
       }
-
       const shuffled = available.sort(() => 0.5 - Math.random());
       emptyCells.forEach(({ input, td }, idx) => {
         const word = shuffled[idx];
@@ -252,7 +234,6 @@
         td.className = "";
         adjustFontSize(input);
       });
-      document.querySelector(".center-free").textContent = "⭐️";
       usedWords.clear();
     };
   </script>
