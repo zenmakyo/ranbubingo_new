@@ -42,37 +42,41 @@
       background-color: #f5f5dc;
     }
     .cell-content {
-      position: relative;
       width: 100%;
       height: 100%;
-      padding: 5%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       box-sizing: border-box;
     }
-    .custom-dropdown input {
+    .dropdown-container {
+      position: relative;
+      width: 90%;
+    }
+    .dropdown-input {
       width: 100%;
-      height: 40%;
       font-size: 2vmin;
+      padding: 0.2em;
       text-align: center;
-      border: none;
       box-sizing: border-box;
     }
     .dropdown-list {
       position: absolute;
-      top: 50%;
+      top: 100%;
       left: 0;
       right: 0;
+      max-height: 150px;
+      overflow-y: auto;
       background: white;
       border: 1px solid #aaa;
-      max-height: 50%;
-      overflow-y: auto;
       z-index: 10;
-      font-size: 1.6vmin;
+      display: none;
     }
-    .dropdown-list div {
-      padding: 4px;
+    .dropdown-item {
+      padding: 0.3em;
       cursor: pointer;
     }
-    .dropdown-list div:hover {
+    .dropdown-item:hover {
       background-color: #eee;
     }
     .button-container {
@@ -114,6 +118,15 @@
     const rainbowWords = ["抹茶", "桜", "忍者", "寿司", "富士山"];
     const table = document.querySelector("#bingo tbody");
 
+    const getUsedWords = () => {
+      const used = new Set();
+      document.querySelectorAll('.dropdown-input').forEach(input => {
+        const val = input.value.trim();
+        if (val) used.add(val);
+      });
+      return used;
+    };
+
     for (let row = 0; row < 5; row++) {
       const tr = document.createElement("tr");
       for (let col = 0; col < 5; col++) {
@@ -125,46 +138,61 @@
           wrapper.className = "cell-content";
 
           const dropdown = document.createElement("div");
-          dropdown.className = "custom-dropdown";
+          dropdown.className = "dropdown-container";
 
           const input = document.createElement("input");
+          input.className = "dropdown-input";
+          input.setAttribute("autocomplete", "off");
+          input.placeholder = "未選択";
+
           const list = document.createElement("div");
           list.className = "dropdown-list";
 
-          function updateDropdown() {
-            list.innerHTML = '';
-            const filter = input.value.trim();
-            const filtered = wordList.filter(w => w.includes(filter));
-            filtered.forEach(word => {
-              const item = document.createElement("div");
-              item.textContent = word;
-              item.addEventListener("click", () => {
-                input.value = word;
-                updateCell(word);
-                list.innerHTML = '';
+          const updateList = () => {
+            const val = input.value.trim();
+            const used = getUsedWords();
+            list.innerHTML = "";
+            wordList
+              .filter(word => word.includes(val) && (!used.has(word) || word === val))
+              .forEach(word => {
+                const item = document.createElement("div");
+                item.className = "dropdown-item";
+                item.textContent = word;
+                item.onclick = () => {
+                  input.value = word;
+                  list.style.display = "none";
+                  input.dispatchEvent(new Event("change"));
+                };
+                list.appendChild(item);
               });
-              list.appendChild(item);
-            });
-          }
+            list.style.display = list.childElementCount ? "block" : "none";
+          };
 
-          function updateCell(val) {
-            if (rainbowWords.includes(val)) {
-              td.style.background = "linear-gradient(135deg, #f4d7f4, #d6c6e1, #c0d4f7, #bde5c8, #fffabf, #ffe4b5, #f7b3b3)";
-              input.style.backgroundColor = "white";
-              input.style.color = "black";
-            } else if (wordList.includes(val)) {
-              td.style.background = "#ccc";
-              input.style.backgroundColor = "white";
-              input.style.color = "black";
-            } else {
+          input.addEventListener("input", updateList);
+          input.addEventListener("focus", updateList);
+          input.addEventListener("blur", () => {
+            setTimeout(() => list.style.display = "none", 200);
+          });
+
+          input.addEventListener("change", () => {
+            const val = input.value.trim();
+            const used = getUsedWords();
+            if (!wordList.includes(val)) {
               alert("このワードはリストにありません！");
               input.value = "";
               td.style.background = "#ccc";
+            } else if ([...used].filter(w => w === val).length > 1) {
+              alert("このワードはすでに選択済みです！");
+              input.value = "";
+              td.style.background = "#ccc";
+            } else {
+              if (rainbowWords.includes(val)) {
+                td.style.background = "linear-gradient(135deg, #f4d7f4, #d6c6e1, #c0d4f7, #bde5c8, #fffabf, #ffe4b5, #f7b3b3)";
+              } else {
+                td.style.background = "#ccc";
+              }
             }
-          }
-
-          input.addEventListener("input", updateDropdown);
-          input.addEventListener("focus", updateDropdown);
+          });
 
           dropdown.appendChild(input);
           dropdown.appendChild(list);
@@ -178,7 +206,7 @@
 
     function randomFill() {
       const used = new Set();
-      const inputs = document.querySelectorAll(".custom-dropdown input");
+      const inputs = document.querySelectorAll(".dropdown-input");
       inputs.forEach(input => {
         let choice;
         do {
@@ -186,16 +214,14 @@
         } while (used.has(choice));
         used.add(choice);
         input.value = choice;
-        input.dispatchEvent(new Event("input"));
         input.dispatchEvent(new Event("change"));
       });
     }
 
     function resetBoard() {
-      const inputs = document.querySelectorAll(".custom-dropdown input");
+      const inputs = document.querySelectorAll(".dropdown-input");
       inputs.forEach(input => {
         input.value = "";
-        input.dispatchEvent(new Event("input"));
         input.dispatchEvent(new Event("change"));
       });
     }
