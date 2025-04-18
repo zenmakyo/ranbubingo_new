@@ -49,7 +49,6 @@
       justify-content: center;
       padding: 5%;
       box-sizing: border-box;
-      position: relative;
     }
     .cell-content input {
       width: 85%;
@@ -58,27 +57,28 @@
       font-size: 2vmin;
       text-align: center;
       resize: none;
+      position: relative;
+      z-index: 2;
     }
-    .suggestion-box {
+    .autocomplete-list {
       position: absolute;
-      top: 100%;
+      top: 90%;
       left: 50%;
       transform: translateX(-50%);
-      background-color: white;
-      border: 1px solid #aaa;
-      z-index: 100;
-      max-height: 50vmin;
+      width: 90%;
+      max-height: 12rem;
       overflow-y: auto;
+      background: white;
+      border: 1px solid #ccc;
+      z-index: 3;
       font-size: 2vmin;
-      width: 150%;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
     }
-    .suggestion-box div {
-      padding: 5px;
+    .autocomplete-item {
+      padding: 0.3em 0.5em;
       cursor: pointer;
     }
-    .suggestion-box div:hover {
-      background-color: #eee;
+    .autocomplete-item:hover {
+      background: #eee;
     }
     .button-container {
       margin-top: 1rem;
@@ -99,7 +99,7 @@
 </head>
 <body>
   <h1>乱舞ビンゴ
-  <br><span style="font-size: 1.5rem; line-height: 1.2; ">大会</span>
+  <br><span style="font-size: 1.5rem; line-height: 1.2;">大会</span>
   </h1>
   <table id="bingo">
     <tbody></tbody>
@@ -122,6 +122,68 @@
 
     const table = document.querySelector("#bingo tbody");
 
+    function createAutocomplete(input, td) {
+      const wrapper = td.querySelector(".cell-content");
+      let list = document.createElement("div");
+      list.className = "autocomplete-list";
+      wrapper.appendChild(list);
+
+      function showList(filter) {
+        list.innerHTML = "";
+        const usedWords = Array.from(document.querySelectorAll("input")).map(i => i.value.trim());
+        const matches = wordList.filter(w => w.includes(filter) || filter === "").filter(w => !usedWords.includes(w));
+        matches.forEach(word => {
+          const item = document.createElement("div");
+          item.className = "autocomplete-item";
+          item.textContent = word;
+          item.onclick = () => {
+            input.value = word;
+            input.dispatchEvent(new Event("input"));
+            list.innerHTML = "";
+          };
+          list.appendChild(item);
+        });
+      }
+
+      input.addEventListener("focus", () => {
+        showList(input.value.trim());
+      });
+
+      input.addEventListener("input", () => {
+        const val = input.value.trim();
+        const used = Array.from(document.querySelectorAll("input"))
+                          .filter(i => i !== input)
+                          .map(i => i.value.trim());
+
+        if (val === "") {
+          td.style.background = "#ccc";
+          return;
+        }
+
+        if (!wordList.includes(val)) {
+          return;
+        }
+
+        if (used.includes(val)) {
+          alert("すでに使用されています！");
+          input.value = "";
+          td.style.background = "#ccc";
+          return;
+        }
+
+        td.style.background = rainbowWords.includes(val)
+          ? "linear-gradient(135deg, #f4d7f4, #d6c6e1, #c0d4f7, #bde5c8, #fffabf, #ffe4b5, #f7b3b3)"
+          : "#ccc";
+        input.style.backgroundColor = "white";
+        input.style.color = "black";
+        showList(val);
+      });
+
+      document.addEventListener("click", (e) => {
+        if (!wrapper.contains(e.target)) list.innerHTML = "";
+      });
+    }
+
     for (let row = 0; row < 5; row++) {
       const tr = document.createElement("tr");
       for (let col = 0; col < 5; col++) {
@@ -138,78 +200,9 @@
           const input = document.createElement("input");
           input.placeholder = "未選択";
 
-          const suggestionBox = document.createElement("div");
-          suggestionBox.className = "suggestion-box";
-          suggestionBox.style.display = "none";
           wrapper.appendChild(input);
-          wrapper.appendChild(suggestionBox);
           td.appendChild(wrapper);
-
-          function updateCellStyle(val) {
-            if (rainbowWords.includes(val)) {
-              td.style.background = "linear-gradient(135deg, #f4d7f4, #d6c6e1, #c0d4f7, #bde5c8, #fffabf, #ffe4b5, #f7b3b3)";
-            } else {
-              td.style.background = "#ccc";
-            }
-          }
-
-          function isWordUsed(word) {
-            const inputs = document.querySelectorAll("input");
-            for (const inp of inputs) {
-              if (inp.value.trim() === word) return true;
-            }
-            return false;
-          }
-
-          function showSuggestions(val) {
-            suggestionBox.innerHTML = "";
-            const filtered = wordList.filter(w => w.includes(val));
-            filtered.forEach(word => {
-              const div = document.createElement("div");
-              div.textContent = word;
-              div.addEventListener("click", () => {
-                if (isWordUsed(word)) {
-                  alert("このワードはすでに使用されています！");
-                  return;
-                }
-                input.value = word;
-                suggestionBox.style.display = "none";
-                updateCellStyle(word);
-              });
-              suggestionBox.appendChild(div);
-            });
-            suggestionBox.style.display = "block";
-          }
-
-          input.addEventListener("focus", () => {
-            showSuggestions("");
-          });
-
-          input.addEventListener("input", () => {
-            updateCellStyle(input.value.trim());
-            showSuggestions(input.value.trim());
-          });
-
-          input.addEventListener("change", () => {
-            const val = input.value.trim();
-            if (val === "") {
-              td.style.background = "#ccc";
-              return;
-            }
-            if (!wordList.includes(val)) {
-              alert("このワードはリストにありません！");
-              input.value = "";
-              td.style.background = "#ccc";
-              return;
-            }
-            updateCellStyle(val);
-          });
-
-          document.addEventListener("click", (e) => {
-            if (!wrapper.contains(e.target)) {
-              suggestionBox.style.display = "none";
-            }
-          });
+          createAutocomplete(input, td);
         }
 
         tr.appendChild(td);
