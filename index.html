@@ -123,32 +123,41 @@
           input.placeholder = "未選択";
 
           input.addEventListener("input", () => {
-            const val = input.value.trim();
-            if (val === "") {
-              td.style.background = "#ccc";
-              return;
-            }
-              if (rainbowWords.includes(val)) {
-                td.style.background = "linear-gradient(135deg, #f4d7f4, #d6c6e1, #c0d4f7, #bde5c8, #fffabf, #ffe4b5, #f7b3b3)";
-  input.style.backgroundColor = "white";
-  input.style.color = "black";
-} else if (!wordList.includes(val)) {
-              alert("このワードはリストにありません！");
-              input.value = "";
-              td.style.background = "#ccc";
-            } else {
-              td.style.background = "#ccc";
-              input.style.color = "black";
-            }
-          });
+  // 入力中は背景をリセット（or 虹色に）
+  const val = input.value.trim();
+  if (rainbowWords.includes(val)) {
+    td.style.background = "linear-gradient(135deg, #f4d7f4, #d6c6e1, #c0d4f7, #bde5c8, #fffabf, #ffe4b5, #f7b3b3)";
+    input.style.backgroundColor = "white";
+    input.style.color = "black";
+  } else {
+    td.style.background = "#ccc";
+    input.style.backgroundColor = "white";
+    input.style.color = "black";
+  }
+});
 
-          wrapper.appendChild(input);
-          td.appendChild(wrapper);
-        }
-        tr.appendChild(td);
-      }
-      table.appendChild(tr);
-    }
+input.addEventListener("change", () => {
+  const val = input.value.trim();
+  if (val === "") {
+    td.style.background = "#ccc";
+    return;
+  }
+
+  if (!wordList.includes(val)) {
+    alert("このワードはリストにありません！");
+    input.value = "";
+    td.style.background = "#ccc";
+    return;
+  }
+
+  // もしリストに含まれていて虹色ワードでなければ再確認
+  if (!rainbowWords.includes(val)) {
+    td.style.background = "#ccc";
+    input.style.backgroundColor = "white";
+    input.style.color = "black";
+  }
+});
+
 
     // datalist を追加（リスト入力補完）
     const dataList = document.createElement("datalist");
