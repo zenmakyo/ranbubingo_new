@@ -191,47 +191,49 @@
           const suggestionBox = document.createElement("div");
           suggestionBox.className = "suggestions";
 
+          input.addEventListener("input", () => {
+  updateSuggestions(input, suggestionBox);
+  suggestionBox.style.display = "block";
+});
+          
           input.addEventListener("focus", () => {
   updateSuggestions(input, suggestionBox);
   suggestionBox.style.display = "block";
 });
 
-// 👇 追加：変換確定時のみ候補を更新
 input.addEventListener("compositionend", () => {
+  // 日本語変換の確定時にも補完候補を更新
   updateSuggestions(input, suggestionBox);
+  suggestionBox.style.display = "block";
 });
 
 let lastAutoFilled = null;
 
 input.addEventListener("keydown", (e) => {
   if (e.key === "Enter") {
-    e.preventDefault();
+    e.preventDefault(); // 改行を防ぐ
 
     const val = input.value.trim();
-    const td = input.closest("td");
     const currentUsed = Array.from(document.querySelectorAll("textarea")).map(i => i.value.trim());
-    const matches = wordList.filter(word => word.includes(val) && !currentUsed.includes(word));
+    const matches = wordList.filter(word => !currentUsed.includes(word) && word.includes(val));
 
-    if (val && wordList.includes(val)) {
-      // ✅ 完全一致かつ未使用なら確定
-      if (!currentUsed.includes(val)) {
-        finalizeInput(input, td, val);
-        suggestionBox.style.display = "none";
-      }
-      return;
-    }
+    const td = input.closest("td");
 
     if (matches.length === 1) {
-      // ✅ 候補が1つ → 自動入力（確定はしない）
+      // ✅ 候補が1つ → 自動入力＆確定
       input.value = matches[0];
-      lastAutoFilled = matches[0];
-      updateSuggestions(input, suggestionBox); // 再表示
+      updateSuggestions(input, suggestionBox); // ← 候補を更新（完全一致でも表示するため）
       suggestionBox.style.display = "block";
+      finalizeInput(input, td, matches[0]);
+
     } else if (matches.length > 1) {
+      // ❌ 候補が複数 → エラー表示＆候補再表示
       alert("リストから選択してください");
       updateSuggestions(input, suggestionBox);
       suggestionBox.style.display = "block";
+
     } else {
+      // ❌ 候補が0件 → ワードなしエラー
       alert("このワードはリストにありません！");
       input.value = "";
       td.style.background = "#ccc";
