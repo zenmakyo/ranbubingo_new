@@ -199,6 +199,13 @@ input.addEventListener("compositionend", () => {
   updateSuggestions(input, suggestionBox);
 });
 
+input.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && input.value.trim() === "") {
+    e.preventDefault();
+    showAllSuggestions(suggestionBox);
+  }
+});
+          
 input.addEventListener("blur", () => {
   setTimeout(() => suggestionBox.style.display = "none", 200);
 });
@@ -270,6 +277,19 @@ input.addEventListener("blur", () => {
       }
     }
 
+function showAllSuggestions(suggestionBox) {
+  const currentUsed = Array.from(document.querySelectorAll("textarea")).map(i => i.value.trim());
+  suggestionBox.innerHTML = "";
+  wordList.forEach(word => {
+    if (!currentUsed.includes(word)) {
+      const div = document.createElement("div");
+      div.textContent = word;
+      suggestionBox.appendChild(div);
+    }
+  });
+  suggestionBox.style.display = "block";
+}
+    
     function randomFill() {
   const inputs = Array.from(document.querySelectorAll("textarea"));
 
