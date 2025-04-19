@@ -301,19 +301,46 @@ input.addEventListener("blur", () => {
     function updateSuggestions(input, suggestionBox, forceDisplay = false) {
   const val = input.value.trim();
   const currentUsed = Array.from(document.querySelectorAll("textarea")).map(i => i.value.trim());
+  const matches = wordList.filter(word => !currentUsed.includes(word) && word.includes(val));
 
+  // まず候補を一旦クリア
   suggestionBox.innerHTML = "";
 
-  const filtered = wordList.filter(word => !currentUsed.includes(word) && word.includes(val));
+  // 条件に合う候補を表示
+  if (forceDisplay || val === "") {
+    // 強制表示 or 空欄時 → 全候補を表示
+    wordList.forEach(word => {
+      if (!currentUsed.includes(word)) {
+        const item = document.createElement("div");
+        item.className = "suggestion-item";
+        item.textContent = word;
+        item.addEventListener("click", () => {
+          input.value = word;
+          suggestionBox.style.display = "none";
+          finalizeInput(input, input.closest("td"), word);
+          suggestionLocked = false;
+        });
+        suggestionBox.appendChild(item);
+      }
+    });
+  } else {
+    // 通常の部分一致表示
+    matches.forEach(word => {
+      const item = document.createElement("div");
+      item.className = "suggestion-item";
+      item.textContent = word;
+      item.addEventListener("click", () => {
+        input.value = word;
+        suggestionBox.style.display = "none";
+        finalizeInput(input, input.closest("td"), word);
+        suggestionLocked = false;
+      });
+      suggestionBox.appendChild(item);
+    });
+  }
 
-  filtered.forEach(word => {
-    const div = document.createElement("div");
-    div.textContent = word;
-    suggestionBox.appendChild(div);
-  });
-
-  // 候補がある or 強制表示フラグが true のときに表示
-  suggestionBox.style.display = (filtered.length > 0 || forceDisplay) ? "block" : "none";
+  // 候補があるときだけ表示、それ以外は非表示
+  suggestionBox.style.display = suggestionBox.children.length > 0 ? "block" : "none";
 }
 
     function finalizeInput(input, td, val) {
