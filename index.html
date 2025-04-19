@@ -290,8 +290,8 @@ input.addEventListener("blur", () => {
   const availableRainbow = rainbowWords.filter(w => !currentUsed.has(w));
   const availableNormal = wordList.filter(w => !currentUsed.has(w) && !rainbowWords.includes(w));
 
-  // 虹の最小と最大を指定
-  const rainbowCount = Math.min(10, Math.max(3, Math.floor(Math.random() * 6)));
+  // 虹の最小と最大を指定ーーーーーーーー↓最大値ーーーーー↓最小値ーーーーーーーーーーーーーーーーー↓最大値に１加える
+  const rainbowCount = Math.min(10, Math.max(3, Math.floor(Math.random() * 11)));
   const selectedRainbow = availableRainbow.sort(() => Math.random() - 0.5).slice(0, rainbowCount);
   const remainingCount = emptyInputs.length - selectedRainbow.length;
   const selectedNormal = availableNormal.sort(() => Math.random() - 0.5).slice(0, remainingCount);
