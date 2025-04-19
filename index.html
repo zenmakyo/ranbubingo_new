@@ -201,6 +201,8 @@ input.addEventListener("compositionend", () => {
   updateSuggestions(input, suggestionBox);
 });
 
+let lastMatched = null; // 自動補完された候補を一時記録
+
 input.addEventListener("keydown", (e) => {
   if (e.key === "Enter") {
     e.preventDefault(); // 改行を防ぐ
@@ -209,7 +211,19 @@ input.addEventListener("keydown", (e) => {
     const td = input.closest("td");
     const currentUsed = Array.from(document.querySelectorAll("textarea")).map(i => i.value.trim());
 
-    // ✅ 完全一致：使用済みチェックしてから確定
+    // 自動入力候補があった場合の2回目のEnter対応
+    if (lastMatched && val === lastMatched) {
+      if (currentUsed.includes(val) && td.querySelector("textarea").value !== val) {
+        alert("すでに使用されています！");
+        return;
+      }
+      finalizeInput(input, td, val);
+      suggestionBox.style.display = "none";
+      lastMatched = null; // クリア
+      return;
+    }
+
+    // 完全一致処理（↑より先に lastMatched をチェックするのが重要）
     if (wordList.includes(val)) {
       if (currentUsed.includes(val) && td.querySelector("textarea").value !== val) {
         alert("すでに使用されています！");
@@ -217,32 +231,32 @@ input.addEventListener("keydown", (e) => {
       }
       finalizeInput(input, td, val);
       suggestionBox.style.display = "none";
+      lastMatched = null;
       return;
     }
 
-    // 🔍 部分一致候補を取得（使用済みも含む）
+    // 部分一致候補取得（※この段階では使用済みを含める）
     const matches = wordList.filter(word => word.includes(val));
 
     if (matches.length === 1) {
-      // ✅ 自動入力のみ（確定しない、サジェスト残す）
       input.value = matches[0];
-
-      // サジェストにその1つを表示し続ける
+      lastMatched = matches[0]; // ⬅️ 記録
+      // サジェストを更新
       suggestionBox.innerHTML = "";
       const div = document.createElement("div");
       div.textContent = matches[0];
       suggestionBox.appendChild(div);
       suggestionBox.style.display = "block";
-
-      // ⚠️ まだ finalizeInput しない（次の Enter で確定）
     } else if (matches.length > 1) {
       alert("リストから選択してください");
       updateSuggestions(input, suggestionBox);
       suggestionBox.style.display = "block";
+      lastMatched = null;
     } else {
       alert("このワードはリストにありません！");
       input.value = "";
       td.style.background = "#ccc";
+      lastMatched = null;
     }
   }
 });
