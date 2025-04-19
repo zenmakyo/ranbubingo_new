@@ -219,19 +219,32 @@ input.addEventListener("keydown", (e) => {
     const td = input.closest("td");
 
     if (matches.length === 1) {
-      // ✅ 候補が1つ → 自動入力＆確定
-      input.value = matches[0];
-      suggestionBox.style.display = "none";
-      finalizeInput(input, td, matches[0]);
+      const matchedWord = matches[0];
+      input.value = matchedWord;
+
+      // ✅ 候補リストを再表示（1件だけでも）
+      suggestionBox.innerHTML = "";
+      const div = document.createElement("div");
+      div.textContent = matchedWord;
+      suggestionBox.appendChild(div);
+      suggestionBox.style.display = "block";
+
+      // ✅ すでに使われているかを再チェック
+      if (usedWords.has(matchedWord)) {
+        alert("すでに使用されています！");
+        input.value = "";
+        td.style.background = "#ccc";
+      } else {
+        finalizeInput(input, td, matchedWord);
+        suggestionBox.style.display = "none";
+      }
 
     } else if (matches.length > 1) {
-      // ❌ 候補が複数 → エラー表示＆候補再表示
       alert("リストから選択してください");
-      updateSuggestions(input, suggestionBox);  // ← ここで候補を再表示
+      updateSuggestions(input, suggestionBox);
       suggestionBox.style.display = "block";
 
     } else {
-      // ❌ 候補が0件 → ワードなしエラー
       alert("このワードはリストにありません！");
       input.value = "";
       td.style.background = "#ccc";
