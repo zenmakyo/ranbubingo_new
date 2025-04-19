@@ -192,7 +192,14 @@
           suggestionBox.className = "suggestions";
 
           input.addEventListener("input", () => {
+   updateSuggestions(input, suggestionBox);
+  suggestionBox.style.display = "block";
+});
+          
+          input.addEventListener("focus", () => {
   updateSuggestions(input, suggestionBox);
+  suggestionBox.style.display = "block";
+});
 
 let suggestionLocked = false; // 候補決定待ち状態かどうか
 
