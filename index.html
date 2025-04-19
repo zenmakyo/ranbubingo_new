@@ -193,13 +193,6 @@
 
           input.addEventListener("input", () => {
   updateSuggestions(input, suggestionBox);
-  suggestionBox.style.display = "block";
-});
-          
-          input.addEventListener("focus", () => {
-  updateSuggestions(input, suggestionBox);
-  suggestionBox.style.display = "block";
-});
 
 let suggestionLocked = false; // 候補決定待ち状態かどうか
 
@@ -238,12 +231,11 @@ input.addEventListener("keydown", (e) => {
   // ⚠️ 複数候補 → 警告＆候補再表示
   alert("リストから選んでください");
 
-  // 入力文字を元に再表示
-  setTimeout(() => {
-    updateSuggestions(input, suggestionBox);
-    suggestionBox.style.display = "block";
-    input.focus();  // 再度 focus して blur を防ぐ
-  }, 0);
+setTimeout(() => {
+  updateSuggestions(input, suggestionBox, true); // ← forceDisplay を true に！
+  suggestionBox.style.display = "block";
+  input.focus();  // blur防止
+}, 0);
 　　 } else {
       // ❌ 候補ゼロ → 警告＆未選択状態に戻す
       alert("別のワードを探してください");
@@ -299,22 +291,22 @@ input.addEventListener("blur", () => {
       table.appendChild(tr);
     }
 
-    function updateSuggestions(input, suggestionBox) {
+    function updateSuggestions(input, suggestionBox, forceDisplay = false) {
   const val = input.value.trim();
   const currentUsed = Array.from(document.querySelectorAll("textarea")).map(i => i.value.trim());
 
   suggestionBox.innerHTML = "";
 
   const filtered = wordList.filter(word => !currentUsed.includes(word) && word.includes(val));
-  
+
   filtered.forEach(word => {
     const div = document.createElement("div");
     div.textContent = word;
     suggestionBox.appendChild(div);
   });
 
-  // 見つからない場合は suggestionBox は空のまま
-  suggestionBox.style.display = filtered.length > 0 ? "block" : "none";
+  // 候補がある or 強制表示フラグが true のときに表示
+  suggestionBox.style.display = (filtered.length > 0 || forceDisplay) ? "block" : "none";
 }
 
     function finalizeInput(input, td, val) {
