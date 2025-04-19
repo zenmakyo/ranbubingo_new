@@ -270,7 +270,7 @@ input.addEventListener("blur", () => {
     function randomFill() {
       resetBoard(); // 入力＆背景＆usedWordsをクリア
 
-      const inputs = Array.from(document.querySelectorAll("input"));
+      const inputs = Array.from(document.querySelectorAll("textarea"));
       const available = wordList.slice().sort(() => Math.random() - 0.5); // シャッフル
 
       inputs.forEach((input, idx) => {
@@ -282,7 +282,7 @@ input.addEventListener("blur", () => {
     }
 
     function resetBoard() {
-      const inputs = document.querySelectorAll("input");
+      const inputs = document.querySelectorAll("textarea");
       inputs.forEach(input => {
         input.value = "";
         input.closest("td").style.background = "#ccc";
