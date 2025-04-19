@@ -273,8 +273,8 @@ input.addEventListener("blur", () => {
     function randomFill() {
   const inputs = Array.from(document.querySelectorAll("textarea"));
   const filled = new Set();
-  
-  // すでに入力済みのワードを把握してusedWordsに追加
+
+  // すでに入力済みのワードをusedWordsに追加
   inputs.forEach(input => {
     const val = input.value.trim();
     if (val) {
@@ -283,17 +283,35 @@ input.addEventListener("blur", () => {
     }
   });
 
-  const available = wordList
-    .filter(word => !usedWords.has(word))
-    .sort(() => Math.random() - 0.5); // シャッフル
+  // 空いてるセルだけ対象
+  const emptyInputs = inputs.filter(input => !input.value.trim());
+
+  // 虹色ワードと通常ワードを分けて取得（usedWordsと重複なし）
+  const availableRainbow = rainbowWords.filter(w => !usedWords.has(w));
+  const availableNormal = wordList.filter(w => !usedWords.has(w) && !rainbowWords.includes(w));
+
+  // 虹色ワードの個数（min 3 ～ max 10）
+  const rainbowCount = Math.min(
+    10,                            // 上限
+    Math.max(3, Math.floor(Math.random() * 6)) // 3～10の乱数
+  );
+
+  const selectedRainbow = availableRainbow
+    .sort(() => Math.random() - 0.5)
+    .slice(0, rainbowCount);
+
+  const remainingCount = emptyInputs.length - selectedRainbow.length;
+
+  const selectedNormal = availableNormal
+    .sort(() => Math.random() - 0.5)
+    .slice(0, remainingCount);
+
+  const selectedWords = [...selectedRainbow, ...selectedNormal].sort(() => Math.random() - 0.5);
 
   let idx = 0;
-  inputs.forEach(input => {
-    if (input.value.trim()) return; // すでに入力済みならスキップ
-
-    const val = available[idx++];
+  emptyInputs.forEach(input => {
+    const val = selectedWords[idx++];
     if (!val) return;
-
     input.value = val;
     const td = input.closest("td");
     finalizeInput(input, td, val);
