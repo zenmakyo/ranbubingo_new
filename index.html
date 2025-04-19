@@ -201,42 +201,51 @@
   suggestionBox.style.display = "block";
 });
 
+let suggestionLocked = false; // 候補決定待ち状態かどうか
+
 input.addEventListener("compositionend", () => {
-  // 日本語変換の確定時にも補完候補を更新
+  suggestionLocked = false;
   updateSuggestions(input, suggestionBox);
-  suggestionBox.style.display = "block";
 });
 
 let lastAutoFilled = null;
 
 input.addEventListener("keydown", (e) => {
   if (e.key === "Enter") {
-    e.preventDefault(); // 改行を防ぐ
-
+    e.preventDefault(); // 改行防止
     const val = input.value.trim();
+    const td = input.closest("td");
+
     const currentUsed = Array.from(document.querySelectorAll("textarea")).map(i => i.value.trim());
     const matches = wordList.filter(word => !currentUsed.includes(word) && word.includes(val));
 
-    const td = input.closest("td");
-
-    if (matches.length === 1) {
-      // ✅ 候補が1つ → 自動入力＆確定
-      input.value = matches[0];
-      updateSuggestions(input, suggestionBox); // ← 候補を更新（完全一致でも表示するため）
-      suggestionBox.style.display = "block";
-      finalizeInput(input, td, matches[0]);
-
-    } else if (matches.length > 1) {
-      // ❌ 候補が複数 → エラー表示＆候補再表示
-      alert("リストから選択してください");
+    if (!suggestionLocked) {
+      // 1回目のEnter または compositionend 後 → 候補表示
       updateSuggestions(input, suggestionBox);
       suggestionBox.style.display = "block";
+      suggestionLocked = true;
+      return;
+    }
 
+    // 以下は「2回目のEnter」の挙動
+    if (matches.length === 1) {
+      // ✅ 候補1つ → 自動入力
+      input.value = matches[0];
+      suggestionBox.style.display = "none";
+      finalizeInput(input, td, matches[0]);
+      suggestionLocked = false;
+    } else if (matches.length > 1) {
+      // ⚠️ 複数候補 → 警告＆候補再表示
+      alert("リストから選んでください");
+      updateSuggestions(input, suggestionBox);
+      suggestionBox.style.display = "block";
     } else {
-      // ❌ 候補が0件 → ワードなしエラー
-      alert("このワードはリストにありません！");
+      // ❌ 候補ゼロ → 警告＆未選択状態に戻す
+      alert("別のワードを探してください");
       input.value = "";
       td.style.background = "#ccc";
+      suggestionBox.style.display = "none";
+      suggestionLocked = false;
     }
   }
 });
@@ -291,19 +300,15 @@ input.addEventListener("blur", () => {
 
   suggestionBox.innerHTML = "";
 
-  if (val === "") return;
-
-  const matches = wordList.filter(word =>
-    word.includes(val) && !currentUsed.includes(word)
-  );
-
-  matches.forEach(match => {
-    const div = document.createElement("div");
-    div.textContent = match;
-    suggestionBox.appendChild(div);
+  wordList.forEach(word => {
+    if (!currentUsed.includes(word) && word.includes(val)) {
+      const div = document.createElement("div");
+      div.textContent = word;
+      suggestionBox.appendChild(div);
+    }
   });
 
-  suggestionBox.style.display = matches.length > 0 ? "block" : "none";
+  suggestionBox.style.display = "block";
 }
 
     function finalizeInput(input, td, val) {
