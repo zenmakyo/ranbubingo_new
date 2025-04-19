@@ -78,7 +78,7 @@
       background-color: white;
       border: 1px solid #ccc;
       border-radius: 5px;
-      z-index: 10;
+      z-index: 999;
       display: none;
       font-size: 2vmin;
     }
@@ -235,16 +235,16 @@ input.addEventListener("keydown", (e) => {
       finalizeInput(input, td, matches[0]);
       suggestionLocked = false;
     } else if (matches.length > 1) {
-    // ⚠️ 複数候補 → 警告＆候補再表示
-    alert("リストから選んでください");
-  
-    // 入力値はそのまま、候補を再生成
+  // ⚠️ 複数候補 → 警告＆候補再表示
+  alert("リストから選んでください");
+
+  // 入力文字を元に再表示
+  setTimeout(() => {
     updateSuggestions(input, suggestionBox);
     suggestionBox.style.display = "block";
-
-    // 再度候補選択待ち状態へ
-    suggestionLocked = true;
-    } else {
+    input.focus();  // 再度 focus して blur を防ぐ
+  }, 0);
+　　 } else {
       // ❌ 候補ゼロ → 警告＆未選択状態に戻す
       alert("別のワードを探してください");
       input.value = "";
