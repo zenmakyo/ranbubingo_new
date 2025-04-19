@@ -235,10 +235,15 @@ input.addEventListener("keydown", (e) => {
       finalizeInput(input, td, matches[0]);
       suggestionLocked = false;
     } else if (matches.length > 1) {
-      // ⚠️ 複数候補 → 警告＆候補再表示
-      alert("リストから選んでください");
-      updateSuggestions(input, suggestionBox);
-      suggestionBox.style.display = "block";
+    // ⚠️ 複数候補 → 警告＆候補再表示
+    alert("リストから選んでください");
+  
+    // 入力値はそのまま、候補を再生成
+    updateSuggestions(input, suggestionBox);
+    suggestionBox.style.display = "block";
+
+    // 再度候補選択待ち状態へ
+    suggestionLocked = true;
     } else {
       // ❌ 候補ゼロ → 警告＆未選択状態に戻す
       alert("別のワードを探してください");
@@ -300,15 +305,16 @@ input.addEventListener("blur", () => {
 
   suggestionBox.innerHTML = "";
 
-  wordList.forEach(word => {
-    if (!currentUsed.includes(word) && word.includes(val)) {
-      const div = document.createElement("div");
-      div.textContent = word;
-      suggestionBox.appendChild(div);
-    }
+  const filtered = wordList.filter(word => !currentUsed.includes(word) && word.includes(val));
+  
+  filtered.forEach(word => {
+    const div = document.createElement("div");
+    div.textContent = word;
+    suggestionBox.appendChild(div);
   });
 
-  suggestionBox.style.display = "block";
+  // 見つからない場合は suggestionBox は空のまま
+  suggestionBox.style.display = filtered.length > 0 ? "block" : "none";
 }
 
     function finalizeInput(input, td, val) {
