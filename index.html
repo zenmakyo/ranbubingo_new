@@ -176,17 +176,18 @@
           suggestionBox.className = "suggestions";
 
           input.addEventListener("focus", () => {
-            updateSuggestions(input, suggestionBox);
-            suggestionBox.style.display = "block";
-          });
+  updateSuggestions(input, suggestionBox);
+  suggestionBox.style.display = "block";
+});
 
-          input.addEventListener("input", () => {
-            updateSuggestions(input, suggestionBox);
-          });
+// 👇 追加：変換確定時のみ候補を更新
+input.addEventListener("compositionend", () => {
+  updateSuggestions(input, suggestionBox);
+});
 
-          input.addEventListener("blur", () => {
-            setTimeout(() => suggestionBox.style.display = "none", 200);
-          });
+input.addEventListener("blur", () => {
+  setTimeout(() => suggestionBox.style.display = "none", 200);
+});
 
           suggestionBox.addEventListener("mousedown", (e) => {
             if (e.target.tagName === "DIV") {
