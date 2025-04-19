@@ -245,7 +245,7 @@ setTimeout(() => {
 }, 0);
 　　 } else {
       // ❌ 候補ゼロ → 警告＆未選択状態に戻す
-      alert("別のワードを探してください");
+      alert("別の幻獣を探してください");
       input.value = "";
       td.style.background = "#ccc";
       suggestionBox.style.display = "none";
@@ -262,7 +262,7 @@ input.addEventListener("blur", () => {
             if (e.target.tagName === "DIV") {
               const selected = e.target.textContent;
               if (usedWords.has(selected)) {
-                alert("選択済みです！");
+                alert("その幻獣は選択済みです！");
                 return;
               }
               input.value = selected;
@@ -274,13 +274,13 @@ input.addEventListener("blur", () => {
           input.addEventListener("change", () => {
             const val = input.value.trim();
             if (!wordList.includes(val)) {
-              alert("乱舞に出現しません！");
+              alert("乱舞の儀に出現しません！");
               input.value = "";
               td.style.background = "#ccc";
               return;
             }
             if (usedWords.has(val)) {
-              alert("選択済みです！");
+              alert("その幻獣は選択済みです！");
               input.value = "";
               td.style.background = "#ccc";
               return;
