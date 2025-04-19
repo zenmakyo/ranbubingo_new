@@ -208,55 +208,28 @@ input.addEventListener("keydown", (e) => {
     e.preventDefault(); // 改行を防ぐ
 
     const val = input.value.trim();
-    const td = input.closest("td");
     const currentUsed = Array.from(document.querySelectorAll("textarea")).map(i => i.value.trim());
+    const matches = wordList.filter(word => !currentUsed.includes(word) && word.includes(val));
 
-    // 自動入力候補があった場合の2回目のEnter対応
-    if (lastMatched && val === lastMatched) {
-      if (currentUsed.includes(val) && td.querySelector("textarea").value !== val) {
-        alert("すでに使用されています！");
-        return;
-      }
-      finalizeInput(input, td, val);
-      suggestionBox.style.display = "none";
-      lastMatched = null; // クリア
-      return;
-    }
-
-    // 完全一致処理（↑より先に lastMatched をチェックするのが重要）
-    if (wordList.includes(val)) {
-      if (currentUsed.includes(val) && td.querySelector("textarea").value !== val) {
-        alert("すでに使用されています！");
-        return;
-      }
-      finalizeInput(input, td, val);
-      suggestionBox.style.display = "none";
-      lastMatched = null;
-      return;
-    }
-
-    // 部分一致候補取得（※この段階では使用済みを含める）
-    const matches = wordList.filter(word => word.includes(val));
+    const td = input.closest("td");
 
     if (matches.length === 1) {
+      // ✅ 候補が1つ → 自動入力＆確定
       input.value = matches[0];
-      lastMatched = matches[0]; // ⬅️ 記録
-      // サジェストを更新
-      suggestionBox.innerHTML = "";
-      const div = document.createElement("div");
-      div.textContent = matches[0];
-      suggestionBox.appendChild(div);
-      suggestionBox.style.display = "block";
+      suggestionBox.style.display = "none";
+      finalizeInput(input, td, matches[0]);
+
     } else if (matches.length > 1) {
+      // ❌ 候補が複数 → エラー表示＆候補再表示
       alert("リストから選択してください");
-      updateSuggestions(input, suggestionBox);
+      updateSuggestions(input, suggestionBox);  // ← ここで候補を再表示
       suggestionBox.style.display = "block";
-      lastMatched = null;
+
     } else {
+      // ❌ 候補が0件 → ワードなしエラー
       alert("このワードはリストにありません！");
       input.value = "";
       td.style.background = "#ccc";
-      lastMatched = null;
     }
   }
 });
