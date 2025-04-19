@@ -270,20 +270,35 @@ input.addEventListener("blur", () => {
       }
     }
 
-    // ★ ここだけ変更しました
     function randomFill() {
-      resetBoard(); // 入力＆背景＆usedWordsをクリア
-
-      const inputs = Array.from(document.querySelectorAll("textarea"));
-      const available = wordList.slice().sort(() => Math.random() - 0.5); // シャッフル
-
-      inputs.forEach((input, idx) => {
-        const td = input.closest("td");
-        const val = available[idx];
-        input.value = val;
-        finalizeInput(input, td, val);
-      });
+  const inputs = Array.from(document.querySelectorAll("textarea"));
+  const filled = new Set();
+  
+  // すでに入力済みのワードを把握してusedWordsに追加
+  inputs.forEach(input => {
+    const val = input.value.trim();
+    if (val) {
+      usedWords.add(val);
+      filled.add(val);
     }
+  });
+
+  const available = wordList
+    .filter(word => !usedWords.has(word))
+    .sort(() => Math.random() - 0.5); // シャッフル
+
+  let idx = 0;
+  inputs.forEach(input => {
+    if (input.value.trim()) return; // すでに入力済みならスキップ
+
+    const val = available[idx++];
+    if (!val) return;
+
+    input.value = val;
+    const td = input.closest("td");
+    finalizeInput(input, td, val);
+  });
+}
 
     function resetBoard() {
       const inputs = document.querySelectorAll("textarea");
