@@ -175,9 +175,14 @@
           const wrapper = document.createElement("div");
           wrapper.className = "cell-content";
 
-          const input = document.createElement("input");
+          const input = document.createElement("textarea");
           input.className = "cell-input";
           input.setAttribute("placeholder", "未選択");
+          input.setAttribute("rows", "1");           // 1行に見せかける（Enterで改行されないように）
+          input.setAttribute("wrap", "soft");        // 折り返しを有効に
+          input.addEventListener("keydown", e => {
+          if (e.key === "Enter") e.preventDefault(); // Enter押下による改行防止
+          });
 
           const suggestionBox = document.createElement("div");
           suggestionBox.className = "suggestions";
