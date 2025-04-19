@@ -159,6 +159,8 @@
   "フレイヤ", "斉天大聖", "ティアマト", "乙姫", "ゲンペイボタル", "オキクルミ", "百花仙子"
 ];
     const roseWord = [ "デーモンローズ" ];
+
+    const mixWords = [ "ゴールド・G・ゴーレム", "シルバー・G・ゴーレム", "つちのこ" ];
     
     const usedWords = new Set();
 
@@ -270,8 +272,23 @@ input.addEventListener("blur", () => {
       usedWords.add(val);
       if (rainbowWords.includes(val)) {
         td.style.background = "linear-gradient(135deg, #f4d7f4, #d6c6e1, #c0d4f7, #bde5c8, #fffabf, #ffe4b5, #f7b3b3)";
-    } else if (roseWord.includes(val)) {
+      } else if (roseWord.includes(val)) {
         td.style.background = "#c05d69";
+      } else if (mixWords.includes(val)) {
+        td.style.background = `
+      linear-gradient(
+        120deg,
+      #f4d7f4 0%,     /* 1色目 0–9% */
+      #d6c6e1 9%,    /* 2色目 9–18% */
+      #c0d4f7 18%,    /* 3色目 18–27% */
+      #bde5c8 27%,    /* 4色目 27–36% */
+      #fffabf 36%,    /* 5色目 36–45% */
+      #ffe4b5 45%,    /* 6色目 45–54% */
+      #f7b3b3 54%,    /* 7色目 54–63% */
+      #ccc 63%,       /* グレー開始 */
+      #ccc 100%       /* グレー終端 */
+      )
+    `; // 左半分が虹色、右半分がグレー
       } else {
         td.style.background = "#ccc";
       }
