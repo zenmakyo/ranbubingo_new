@@ -158,6 +158,8 @@
   "緋翼のアグシャナ", "フェンリル", "バハムート", "創造神", "月日を追う者", "スカサハ", "ベヒモス", "エレクトラ", "金鵄", "赫轟魔イフリート",
   "フレイヤ", "斉天大聖", "ティアマト", "乙姫", "ゲンペイボタル", "オキクルミ", "百花仙子"
 ];
+    const roseWord = [ "デーモンローズ" ];
+    
     const usedWords = new Set();
 
     const table = document.querySelector("#bingo tbody");
@@ -261,6 +263,8 @@ input.addEventListener("blur", () => {
       usedWords.add(val);
       if (rainbowWords.includes(val)) {
         td.style.background = "linear-gradient(135deg, #f4d7f4, #d6c6e1, #c0d4f7, #bde5c8, #fffabf, #ffe4b5, #f7b3b3)";
+    } else if (roseWord.includes(val)) {
+        td.style.background = "#c05d69";
       } else {
         td.style.background = "#ccc";
       }
