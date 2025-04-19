@@ -272,39 +272,29 @@ input.addEventListener("blur", () => {
 
     function randomFill() {
   const inputs = Array.from(document.querySelectorAll("textarea"));
-  const filled = new Set();
 
-  // すでに入力済みのワードをusedWordsに追加
-  inputs.forEach(input => {
-    const val = input.value.trim();
-    if (val) {
-      usedWords.add(val);
-      filled.add(val);
-    }
-  });
+  // 入力済みセルのカウント
+  const filledInputs = inputs.filter(input => input.value.trim());
+  const allFilled = filledInputs.length === inputs.length;
 
-  // 空いてるセルだけ対象
-  const emptyInputs = inputs.filter(input => !input.value.trim());
+  // 全て埋まっていたら一旦リセット
+  if (allFilled) {
+    resetBoard();
+  }
 
-  // 虹色ワードと通常ワードを分けて取得（usedWordsと重複なし）
-  const availableRainbow = rainbowWords.filter(w => !usedWords.has(w));
-  const availableNormal = wordList.filter(w => !usedWords.has(w) && !rainbowWords.includes(w));
+  // 再取得（リセットされた場合は全て空、されてない場合は空きセルのみ対象）
+  const updatedInputs = Array.from(document.querySelectorAll("textarea"));
+  const emptyInputs = updatedInputs.filter(input => !input.value.trim());
 
-  // 虹色ワードの個数（min 3 ～ max 10）
-  const rainbowCount = Math.min(
-    10,                            // 上限
-    Math.max(3, Math.floor(Math.random() * 6)) // 3～10の乱数
-  );
+  const currentUsed = new Set(updatedInputs.map(input => input.value.trim()).filter(Boolean));
+  const availableRainbow = rainbowWords.filter(w => !currentUsed.has(w));
+  const availableNormal = wordList.filter(w => !currentUsed.has(w) && !rainbowWords.includes(w));
 
-  const selectedRainbow = availableRainbow
-    .sort(() => Math.random() - 0.5)
-    .slice(0, rainbowCount);
-
+  // 虹の最小と最大を指定
+  const rainbowCount = Math.min(10, Math.max(3, Math.floor(Math.random() * 6)));
+  const selectedRainbow = availableRainbow.sort(() => Math.random() - 0.5).slice(0, rainbowCount);
   const remainingCount = emptyInputs.length - selectedRainbow.length;
-
-  const selectedNormal = availableNormal
-    .sort(() => Math.random() - 0.5)
-    .slice(0, remainingCount);
+  const selectedNormal = availableNormal.sort(() => Math.random() - 0.5).slice(0, remainingCount);
 
   const selectedWords = [...selectedRainbow, ...selectedNormal].sort(() => Math.random() - 0.5);
 
@@ -317,6 +307,7 @@ input.addEventListener("blur", () => {
     finalizeInput(input, td, val);
   });
 }
+
 
     function resetBoard() {
       const inputs = document.querySelectorAll("textarea");
