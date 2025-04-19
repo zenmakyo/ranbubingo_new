@@ -229,20 +229,20 @@
     }
 
     function updateSuggestions(input, suggestionBox) {
-      const val = input.value.trim();
-      const currentUsed = Array.from(document.querySelectorAll("input")).map(i => i.value.trim());
-      suggestionBox.innerHTML = "";
+  const val = input.value.trim();
+  const currentUsed = Array.from(document.querySelectorAll("input")).map(i => i.value.trim());
+  suggestionBox.innerHTML = "";
 
-      wordList.forEach(word => {
-        if (!currentUsed.includes(word)) {
-          const div = document.createElement("div");
-          div.textContent = word;
-          suggestionBox.appendChild(div);
-        }
-      });
-
-      suggestionBox.style.display = "block";
+  wordList.forEach(word => {
+    if (!currentUsed.includes(word) && word.includes(val)) {
+      const div = document.createElement("div");
+      div.textContent = word;
+      suggestionBox.appendChild(div);
     }
+  });
+
+  suggestionBox.style.display = "block";
+}
 
     function finalizeInput(input, td, val) {
       usedWords.add(val);
