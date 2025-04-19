@@ -202,32 +202,47 @@ input.addEventListener("compositionend", () => {
 });
 
 input.addEventListener("keydown", (e) => {
-  if (e.key === "Enter" && input.value.trim() === "") {
-    e.preventDefault();
-    showAllSuggestions(suggestionBox);
-  }
-});
-
-input.addEventListener("keydown", (e) => {
   if (e.key === "Enter") {
     e.preventDefault(); // 改行を防ぐ
 
     const val = input.value.trim();
-    const currentUsed = Array.from(document.querySelectorAll("textarea")).map(i => i.value.trim());
-    const matches = wordList.filter(word => !currentUsed.includes(word) && word.includes(val));
-
     const td = input.closest("td");
+    const currentUsed = Array.from(document.querySelectorAll("textarea")).map(i => i.value.trim());
+
+    // 完全一致チェック
+    if (wordList.includes(val)) {
+      if (currentUsed.includes(val) && input.value !== val) {
+        alert("すでに使用されています！");
+        input.value = "";
+        td.style.background = "#ccc";
+        return;
+      }
+      // ✅ 完全一致 + 未使用 → 確定
+      finalizeInput(input, td, val);
+      suggestionBox.style.display = "none";
+      return;
+    }
+
+    // 部分一致の候補取得（未使用のみ）
+    const matches = wordList.filter(word => word.includes(val) && !currentUsed.includes(word));
 
     if (matches.length === 1) {
-      // ✅ 候補が1つ → 自動入力＆確定
+      // ✅ 部分一致候補が1つ → 自動入力＆確定、でもサジェストは残す
       input.value = matches[0];
-      suggestionBox.style.display = "none";
+
+      // サジェストを明示的に表示（選ばれたワード含めて）
+      suggestionBox.innerHTML = "";
+      const div = document.createElement("div");
+      div.textContent = matches[0];
+      suggestionBox.appendChild(div);
+      suggestionBox.style.display = "block";
+
       finalizeInput(input, td, matches[0]);
 
     } else if (matches.length > 1) {
       // ❌ 候補が複数 → エラー表示＆候補再表示
       alert("リストから選択してください");
-      updateSuggestions(input, suggestionBox);  // ← ここで候補を再表示
+      updateSuggestions(input, suggestionBox);
       suggestionBox.style.display = "block";
 
     } else {
