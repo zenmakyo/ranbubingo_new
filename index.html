@@ -273,14 +273,14 @@ input.addEventListener("blur", () => {
 
           input.addEventListener("change", () => {
             const val = input.value.trim();
-            if (!wordList.includes(val)) {
-              alert("乱舞の儀に出現しません！");
+            if (usedWords.has(val)) {
+              alert("その幻獣は選択済みです！");
               input.value = "";
               td.style.background = "#ccc";
               return;
             }
-            if (usedWords.has(val)) {
-              alert("その幻獣は選択済みです！");
+            if (!wordList.includes(val)) {
+              alert("乱舞の儀に出現しません！");
               input.value = "";
               td.style.background = "#ccc";
               return;
