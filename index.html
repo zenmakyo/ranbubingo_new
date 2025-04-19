@@ -53,16 +53,20 @@
       position: relative;
     }
     .cell-input {
-      width: 85%;
-      height: 85%;
-      box-sizing: border-box;
-      font-size: 2.5vmin;
-      text-align: center;
-      position: relative;
-      white-space: normal;     /* 折り返しを許可 */
-      overflow: hidden;        /* はみ出した部分は隠す */
-      word-break: break-word;
-    }
+  width: 85%;
+  height: 85%;
+  box-sizing: border-box;
+  font-size: 2.5vmin;
+  text-align: center;
+  position: relative;
+  
+  /* ↓↓ テキストエリア用のスタイル調整 ↓↓ */
+  resize: none;             /* サイズ変更を無効にする */
+  overflow-wrap: break-word;/* 単語途中でも折り返す */
+  word-break: break-word;   /* 単語途中でも折り返す（追加で確実に） */
+  overflow: hidden;         /* はみ出した部分は隠す */
+  white-space: pre-wrap;    /* 折り返しを許可（改行も保持、でもEnter無効にするからOK） */
+}
     .suggestions {
       position: absolute;
       top: 90%;
