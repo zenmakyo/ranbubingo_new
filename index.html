@@ -216,13 +216,25 @@ input.addEventListener("keydown", (e) => {
     const currentUsed = Array.from(document.querySelectorAll("textarea")).map(i => i.value.trim());
     const matches = wordList.filter(word => !currentUsed.includes(word) && word.includes(val));
 
-    // 候補が1つだけなら自動で入力して確定
+    const td = input.closest("td");
+
     if (matches.length === 1) {
+      // ✅ 候補が1つ → 自動入力＆確定
       input.value = matches[0];
       suggestionBox.style.display = "none";
-
-      const td = input.closest("td");
       finalizeInput(input, td, matches[0]);
+
+    } else if (matches.length > 1) {
+      // ❌ 候補が複数 → エラー表示＆候補再表示
+      alert("リストから選択してください");
+      updateSuggestions(input, suggestionBox);  // ← ここで候補を再表示
+      suggestionBox.style.display = "block";
+
+    } else {
+      // ❌ 候補が0件 → ワードなしエラー
+      alert("このワードはリストにありません！");
+      input.value = "";
+      td.style.background = "#ccc";
     }
   }
 });
