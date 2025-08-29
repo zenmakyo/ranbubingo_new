@@ -113,13 +113,10 @@
   </h1>
 
   <!-- 名前入力欄（右寄せ） -->
-  <div style="margin: 0.5rem 2rem; text-align: right;">
-    <input 
-      type="text" 
-      id="playerName" 
-      placeholder="名前を入力してください" 
-      style="font-size: 1.5rem; font-weight: bold; font-family: 'Zen Kurenaido', sans-serif; padding: 0.4rem 0.8rem; border-radius: 8px; text-align:center;"
-    >
+  <div id="name-container" style="width:90vmin; margin:auto; text-align:center;">
+    <input type="text" id="player-name" 
+           placeholder="名前を入力してください"
+           style="width:100%; font-size:2vmin; text-align:center; box-sizing:border-box;">
   </div>
   
   <table id="bingo">
@@ -132,6 +129,33 @@
   </div>
 
   <script>
+const container = document.getElementById("name-container");
+    const input = document.getElementById("player-name");
+
+    input.addEventListener("change", () => {
+      const name = input.value.trim();
+      if (name === "") return;
+
+      // 入力欄を非表示にして名前と編集ボタンに置き換える
+      container.innerHTML = `
+        <div style="display:flex; justify-content:center; align-items:center; gap:0.5rem;">
+          <span style="font-size:2vmin; font-weight:bold;">${name}</span>
+          <button id="edit-name" style="font-size:1.5vmin;">編集</button>
+        </div>
+      `;
+
+      // 編集ボタン押したら再入力モードへ
+      document.getElementById("edit-name").addEventListener("click", () => {
+        container.innerHTML = `
+          <input type="text" id="player-name" 
+                 placeholder="名前を入力してください"
+                 style="width:100%; font-size:2vmin; text-align:center; box-sizing:border-box;"
+                 value="${name}">
+        `;
+        document.getElementById("player-name").focus();
+      });
+    });
+    
     const wordList = [
   "ケロペン先生", "憤慨するタウマース", "ハマガイ", "ふにゃ渡し", "かぼプキン", "星ノ位・天秤の傍役", "カラマリン", "てる坊主", "スカディの傍役", "謎掛の悪戯猫の傍役",
   "甘言に従う者の傍役", "キーウィ", "パヨカムイ（Lv49)", "ストラプト", "ウシャマル", "グリモワール", "木霊里", "錬金術師ソフィアの傍役", "ガネーシャ", "丙申",
