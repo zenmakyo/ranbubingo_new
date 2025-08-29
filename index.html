@@ -133,9 +133,19 @@ input.addEventListener("change", () => {
   const name = input.value.trim();
   if (name === "") return;
 
-  // 入力欄を非表示にして名前だけ表示
+  // 入力欄を非表示にしてh1と同じ見た目で名前を表示
   container.innerHTML = `
-    <div style="font-size:2vmin; font-weight:bold; text-align:center;">
+    <div style="
+      font-family: 'Zen Kurenaido', sans-serif;
+      font-size: 3.5rem;
+      color: white;
+      -webkit-text-stroke: 3px black;
+      paint-order: stroke fill;
+      font-weight: bold;
+      padding: 0.5rem;
+      line-height: 1.1;
+      text-align: center;
+    ">
       ${name}
     </div>
   `;
