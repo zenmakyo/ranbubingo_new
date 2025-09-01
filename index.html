@@ -465,7 +465,6 @@ function showAllSuggestions(suggestionBox) {
       usedWords.clear();
     }
     
-    const confirmBtn = document.getElementById("confirm-btn");
 const buttonContainer = document.querySelector(".button-container");
 let confirmed = false;
 
@@ -550,10 +549,8 @@ function undoConfirm() {
 }
 
 // 最初の確定ボタンに処理を設定
-const confirmBtn = document.getElementById("confirm-btn");
+let confirmBtn = document.getElementById("confirm-btn");
 if (confirmBtn) confirmBtn.onclick = confirmBoard;
-
-    });
     
   </script>
 </body>
