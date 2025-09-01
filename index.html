@@ -497,6 +497,20 @@ function confirmBoard() {
   const confirmBtn = document.getElementById("confirm-btn");
   if (confirmBtn) confirmBtn.remove();
 
+  // 色リセットボタン作成（確定後のみ）
+  if (!document.getElementById("color-reset-btn")) {
+    const colorResetBtn = document.createElement("button");
+    colorResetBtn.id = "color-reset-btn";
+    colorResetBtn.textContent = "色リセット";
+    colorResetBtn.addEventListener("click", resetCellColors);
+    const resetBtn = document.getElementById("reset-btn");
+    if (resetBtn) {
+      buttonContainer.insertBefore(colorResetBtn, resetBtn);
+    } else {
+      buttonContainer.appendChild(colorResetBtn);
+    }
+  }
+
   // 解除ボタン作成
   if (!document.getElementById("undo-btn")) {
     const undoBtn = document.createElement("button");
@@ -511,6 +525,14 @@ function confirmBoard() {
       buttonContainer.appendChild(undoBtn);
     }
   }
+}
+
+// 色リセット処理
+function resetCellColors() {
+  const cells = Array.from(document.querySelectorAll("#bingo td div"));
+  cells.forEach(div => {
+    div.style.backgroundColor = ""; // 色だけリセット
+  });
 }
 
 // 確定解除処理
@@ -544,6 +566,10 @@ function undoConfirm() {
   // 解除ボタン削除
   const undoBtn = document.getElementById("undo-btn");
   if (undoBtn) undoBtn.remove();
+
+  // 色リセットボタン削除
+  const colorResetBtn = document.getElementById("color-reset-btn");
+  if (colorResetBtn) colorResetBtn.remove();
 
   confirmed = false;
 }
