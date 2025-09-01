@@ -127,6 +127,7 @@
   <div class="button-container">
     <button onclick="randomFill()">ランダム配置</button>
     <button onclick="resetBoard()">リセット</button>
+    <button onclick="confirmBoard()">確定</button>
   </div>
 
   <script>
@@ -463,6 +464,11 @@ function showAllSuggestions(suggestionBox) {
       });
       usedWords.clear();
     }
+    
+    function confirmBoard() {
+    alert("確定ボタンが押されました！");
+  }
+
   </script>
 </body>
 </html>
