@@ -92,14 +92,14 @@
       background-color: #eee;
     }
     .button-container {
-      margin-top: 1rem;
+      margin: 1rem 5%;
       display: flex;
       justify-content: center;
       gap: 1rem;
     }
     button {
       padding: 0.6rem 1.2rem;
-      font-size: 1rem 5%;
+      font-size: 1rem;
       border: none;
       border-radius: 8px;
       background-color: #2e4e1e;
@@ -548,7 +548,7 @@ function undoConfirm() {
     buttonContainer.insertBefore(newRandomBtn, document.getElementById("reset-btn"));
   }
 
-  // リセットボタン復活
+  // リセットボタン復活（先に追加して最後尾に置く）
   if (!document.getElementById("reset-btn")) {
     const resetBtn = document.createElement("button");
     resetBtn.id = "reset-btn";
@@ -557,13 +557,16 @@ function undoConfirm() {
     buttonContainer.appendChild(resetBtn);
   }
 
-  // 確定ボタン復活
+  // 確定ボタン復活（リセットの前に挿入）
   if (!document.getElementById("confirm-btn")) {
     const confirmBtn = document.createElement("button");
     confirmBtn.id = "confirm-btn";
     confirmBtn.textContent = "確定";
     confirmBtn.onclick = confirmBoard;
-    buttonContainer.insertBefore(confirmBtn, document.getElementById("reset-btn"));
+    const resetBtn = document.getElementById("reset-btn");
+    if (resetBtn) {
+      buttonContainer.insertBefore(confirmBtn, resetBtn);
+    }
   }
 
   // 解除ボタン削除
