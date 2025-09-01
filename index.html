@@ -469,6 +469,30 @@ function showAllSuggestions(suggestionBox) {
     alert("確定ボタンが押されました！");
   }
 
+  function confirmBoard() {
+    const cells = document.querySelectorAll("#bingo td");
+
+    cells.forEach((cell, index) => {
+      // 中央セルはスキップ（5x5 = 25マス → 中央は index 12）
+      if (index === 12) return;
+
+      const input = cell.querySelector("input");
+      if (input) {
+        const text = input.value.trim();
+        // input を削除
+        cell.removeChild(input);
+        // テキスト化
+        const span = document.createElement("span");
+        span.textContent = text;
+        span.style.fontSize = "2.5vmin";
+        span.style.wordBreak = "break-word";
+        span.style.textAlign = "center";
+        span.style.display = "block";
+        cell.appendChild(span);
+      }
+    });
+  }
+    
   </script>
 </body>
 </html>
