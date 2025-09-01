@@ -497,13 +497,9 @@ function confirmBoard() {
   const confirmBtn = document.getElementById("confirm-btn");
   if (confirmBtn) confirmBtn.remove();
 
-  // 色リセットボタン（表示だけ、クリック処理なし）
-  if (!document.getElementById("color-reset-btn")) {
-    const colorResetBtn = document.createElement("button");
-    colorResetBtn.id = "color-reset-btn";
-    colorResetBtn.textContent = "色リセット";
-    buttonContainer.insertBefore(colorResetBtn, document.getElementById("reset-btn"));
-  }
+  // リセットボタン削除
+  const resetBtn = document.getElementById("reset-btn");
+  if (resetBtn) resetBtn.remove();
 
   // 解除ボタン作成
   if (!document.getElementById("undo-btn")) {
@@ -512,7 +508,6 @@ function confirmBoard() {
     undoBtn.textContent = "解除";
     undoBtn.addEventListener("click", undoConfirm);
 
-    const resetBtn = document.getElementById("reset-btn");
     if (resetBtn) {
       buttonContainer.insertBefore(undoBtn, resetBtn.nextSibling);
     } else {
@@ -540,6 +535,15 @@ function undoConfirm() {
     buttonContainer.insertBefore(newRandomBtn, document.getElementById("reset-btn"));
   }
 
+  // リセットボタン復活
+  if (!document.getElementById("reset-btn")) {
+    const resetBtn = document.createElement("button");
+    resetBtn.id = "reset-btn";
+    resetBtn.textContent = "リセット";
+    resetBtn.onclick = resetBoard; // 既存のリセット処理
+    buttonContainer.appendChild(resetBtn);
+  }
+
   // 確定ボタン復活
   if (!document.getElementById("confirm-btn")) {
     const confirmBtn = document.createElement("button");
@@ -548,10 +552,6 @@ function undoConfirm() {
     confirmBtn.onclick = confirmBoard;
     buttonContainer.insertBefore(confirmBtn, document.getElementById("reset-btn"));
   }
-
-  // 色リセットボタン削除
-  const colorResetBtn = document.getElementById("color-reset-btn");
-  if (colorResetBtn) colorResetBtn.remove();
 
   // 解除ボタン削除
   const undoBtn = document.getElementById("undo-btn");
