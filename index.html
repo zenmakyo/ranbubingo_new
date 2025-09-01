@@ -469,29 +469,33 @@ function showAllSuggestions(suggestionBox) {
     alert("確定ボタンが押されました！");
   }
 
-  function confirmBoard() {
-    const cells = document.querySelectorAll("#bingo td");
+    function confirmBoard() {
+  const cells = document.querySelectorAll("#bingo td"); // 全マス取得
 
-    cells.forEach((cell, index) => {
-      // 中央セルはスキップ（5x5 = 25マス → 中央は index 12）
-      if (index === 12) return;
+  cells.forEach(cell => {
+    const input = cell.querySelector(".cell-input"); // セル内の入力欄を探す
+    if (input) {
+      const text = input.value.trim();
+      // セル内のHTMLを「テキストだけ」に置き換える
+      cell.innerHTML = `<div class="cell-content">${text}</div>`;
+    }
+  });
 
-      const input = cell.querySelector("input");
-      if (input) {
-        const text = input.value.trim();
-        // input を削除
-        cell.removeChild(input);
-        // テキスト化
-        const span = document.createElement("span");
-        span.textContent = text;
-        span.style.fontSize = "2.5vmin";
-        span.style.wordBreak = "break-word";
-        span.style.textAlign = "center";
-        span.style.display = "block";
-        cell.appendChild(span);
-      }
-    });
-  }
+  // ボタン入れ替え
+  const btnContainer = document.querySelector(".button-container");
+  const randomBtn = btnContainer.querySelector("button[onclick='randomFill()']");
+  if (randomBtn) randomBtn.remove(); // ランダム配置ボタンを消す
+
+  // 確定ボタンは残す代わりに disable するか、削除して解除を出す
+  const confirmBtn = btnContainer.querySelector("button[onclick='confirmBoard()']");
+  if (confirmBtn) confirmBtn.remove();
+
+  // 解除ボタン追加
+  const cancelBtn = document.createElement("button");
+  cancelBtn.textContent = "解除";
+  cancelBtn.onclick = cancelBoard;
+  btnContainer.appendChild(cancelBtn);
+}
     
   </script>
 </body>
