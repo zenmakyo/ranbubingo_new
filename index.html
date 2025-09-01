@@ -124,7 +124,7 @@
     <tbody></tbody>
   </table>
 
-  <div class="button-container">
+  <div class="button-container" style="justify-content: center;">
   <button id="random-btn" onclick="randomFill()">ランダム配置</button>
   <button id="reset-btn" onclick="resetBoard()">リセット</button>
   <button id="confirm-btn">確定</button>
@@ -482,6 +482,7 @@ function confirmBoard() {
 
   alert("マスを確定します！\n解除ボタンで変更できます");
 
+  // セルをテキスト表示に変更
   inputs.forEach(input => {
     const td = input.closest("td");
     td.innerHTML = `<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;">${input.value}</div>`;
@@ -500,6 +501,18 @@ function confirmBoard() {
   // リセットボタン削除
   const resetBtn = document.getElementById("reset-btn");
   if (resetBtn) resetBtn.remove();
+
+  // 色リセットボタン作成
+  if (!document.getElementById("color-reset-btn")) {
+    const colorResetBtn = document.createElement("button");
+    colorResetBtn.id = "color-reset-btn";
+    colorResetBtn.textContent = "色リセット";
+    colorResetBtn.onclick = () => {
+      const cells = Array.from(document.querySelectorAll("#bingo td div"));
+      cells.forEach(div => div.style.backgroundColor = ""); // 色を消す
+    };
+    buttonContainer.appendChild(colorResetBtn);
+  }
 
   // 解除ボタン作成
   if (!document.getElementById("undo-btn")) {
@@ -540,7 +553,7 @@ function undoConfirm() {
     const resetBtn = document.createElement("button");
     resetBtn.id = "reset-btn";
     resetBtn.textContent = "リセット";
-    resetBtn.onclick = resetBoard; // 既存のリセット処理
+    resetBtn.onclick = resetBoard;
     buttonContainer.appendChild(resetBtn);
   }
 
@@ -556,6 +569,10 @@ function undoConfirm() {
   // 解除ボタン削除
   const undoBtn = document.getElementById("undo-btn");
   if (undoBtn) undoBtn.remove();
+
+  // 色リセットボタン削除
+  const colorResetBtn = document.getElementById("color-reset-btn");
+  if (colorResetBtn) colorResetBtn.remove();
 
   confirmed = false;
 }
