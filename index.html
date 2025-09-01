@@ -469,9 +469,6 @@ function showAllSuggestions(suggestionBox) {
 const buttonContainer = document.querySelector(".button-container");
 let confirmed = false;
 
-const buttonContainer = document.querySelector(".button-container");
-let confirmed = false;
-
 // 共通の確定処理
 function confirmBoard() {
   const cells = Array.from(document.querySelectorAll("#bingo td"));
@@ -555,8 +552,6 @@ function undoConfirm() {
 // 最初の確定ボタンに処理を設定
 const confirmBtn = document.getElementById("confirm-btn");
 if (confirmBtn) confirmBtn.onclick = confirmBoard;
-
-    }
     
   </script>
 </body>
