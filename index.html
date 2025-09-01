@@ -500,42 +500,52 @@ const confirmBtn = document.getElementById("confirm-btn");
 if (confirmBtn) confirmBtn.remove();
 
   // 解除ボタン作成
-  if (!document.getElementById("undo-btn")) {
-    const undoBtn = document.createElement("button");
-    undoBtn.id = "undo-btn";
-    undoBtn.textContent = "解除";
-    undoBtn.addEventListener("click", () => {
-      // 確定前の状態に戻す
-      cells.forEach((td, i) => {
-        if (i !== 12) {
-          const value = td.textContent.trim();
-          td.innerHTML = `<textarea class="cell-input">${value}</textarea>`;
-        }
-      });
+if (!document.getElementById("undo-btn")) {
+  const undoBtn = document.createElement("button");
+  undoBtn.id = "undo-btn";
+  undoBtn.textContent = "解除";
+  undoBtn.addEventListener("click", () => {
+    // 確定前の状態に戻す（テキストボックス化）
+    cells.forEach((td, i) => {
+      if (i !== 12) {
+        const value = td.textContent.trim();
+        td.innerHTML = `<textarea class="cell-input">${value}</textarea>`;
+      }
+    });
 
-      // ランダム配置ボタン復活
+    // ランダム配置ボタン復活（確定前と同じ順番で）
+    if (!document.getElementById("random-btn")) {
       const newRandomBtn = document.createElement("button");
       newRandomBtn.id = "random-btn";
       newRandomBtn.textContent = "ランダム配置";
       newRandomBtn.onclick = randomFill;
       buttonContainer.insertBefore(newRandomBtn, document.getElementById("reset-btn"));
+    }
 
-      // 確定ボタン復活
-      if (!document.getElementById("confirm-btn")) {
+    // 確定ボタン復活（リセットボタンの後に配置）
+    if (!document.getElementById("confirm-btn")) {
       const confirmBtn = document.createElement("button");
       confirmBtn.id = "confirm-btn";
       confirmBtn.textContent = "確定";
-      confirmBtn.onclick = confirmBoard; // 確定処理の関数を設定
-      buttonContainer.insertBefore(confirmBtn, document.getElementById("reset-btn")); 
-     }
-      
-      // 解除ボタン削除
-      undoBtn.remove();
-      confirmed = false;
-    });
+      confirmBtn.onclick = confirmBoard; // 確定処理の関数
+      buttonContainer.insertBefore(confirmBtn, document.getElementById("reset-btn"));
+    }
+
+    // 解除ボタン削除
+    undoBtn.remove();
+
+    // 状態を確定前に戻す
+    confirmed = false;
+  });
+
+  // リセットボタンの後に解除ボタンを配置
+  const resetBtn = document.getElementById("reset-btn");
+  if (resetBtn) {
+    buttonContainer.insertBefore(undoBtn, resetBtn.nextSibling);
+  } else {
     buttonContainer.appendChild(undoBtn);
   }
-});
+}
     
   </script>
 </body>
