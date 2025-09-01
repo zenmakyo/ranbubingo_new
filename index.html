@@ -504,8 +504,10 @@ if (!document.getElementById("undo-btn")) {
   const undoBtn = document.createElement("button");
   undoBtn.id = "undo-btn";
   undoBtn.textContent = "解除";
+
+  // クリックで確定前の状態に戻す
   undoBtn.addEventListener("click", () => {
-    // 確定前の状態に戻す（テキストボックス化）
+    // マスをテキストボックス化（中央は除く）
     cells.forEach((td, i) => {
       if (i !== 12) {
         const value = td.textContent.trim();
@@ -513,7 +515,7 @@ if (!document.getElementById("undo-btn")) {
       }
     });
 
-    // ランダム配置ボタン復活（確定前と同じ順番で）
+    // ランダム配置ボタン復活
     if (!document.getElementById("random-btn")) {
       const newRandomBtn = document.createElement("button");
       newRandomBtn.id = "random-btn";
@@ -522,7 +524,7 @@ if (!document.getElementById("undo-btn")) {
       buttonContainer.insertBefore(newRandomBtn, document.getElementById("reset-btn"));
     }
 
-    // 確定ボタン復活（リセットボタンの後に配置）
+    // 確定ボタン復活
     if (!document.getElementById("confirm-btn")) {
       const confirmBtn = document.createElement("button");
       confirmBtn.id = "confirm-btn";
@@ -538,7 +540,7 @@ if (!document.getElementById("undo-btn")) {
     confirmed = false;
   });
 
-  // リセットボタンの後に解除ボタンを配置
+  // リセットボタンの後に配置
   const resetBtn = document.getElementById("reset-btn");
   if (resetBtn) {
     buttonContainer.insertBefore(undoBtn, resetBtn.nextSibling);
@@ -546,7 +548,6 @@ if (!document.getElementById("undo-btn")) {
     buttonContainer.appendChild(undoBtn);
   }
 }
-});
     
   </script>
 </body>
