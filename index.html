@@ -469,12 +469,15 @@ function showAllSuggestions(suggestionBox) {
 const buttonContainer = document.querySelector(".button-container");
 let confirmed = false;
 
-confirmBtn.addEventListener("click", () => {
+const buttonContainer = document.querySelector(".button-container");
+let confirmed = false;
+
+// 共通の確定処理
+function confirmBoard() {
   const cells = Array.from(document.querySelectorAll("#bingo td"));
-  const inputs = cells.filter((td, i) => i !== 12)  // 真ん中以外
+  const inputs = cells.filter((td, i) => i !== 12)
                       .map(td => td.querySelector("textarea"));
 
-  // 全マス入力チェック
   const emptyCell = inputs.some(input => !input || input.value.trim() === "");
   if (emptyCell) {
     alert("マスを全て埋めてください");
@@ -483,7 +486,6 @@ confirmBtn.addEventListener("click", () => {
 
   alert("マスを確定します！\n解除ボタンで変更できます");
 
-  // マスの固定化（テキスト化）
   inputs.forEach(input => {
     const td = input.closest("td");
     td.innerHTML = `<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;">${input.value}</div>`;
@@ -495,88 +497,65 @@ confirmBtn.addEventListener("click", () => {
   const randomBtn = document.getElementById("random-btn");
   if (randomBtn) randomBtn.remove();
 
-  // 確定ボタン押下時の処理の最後に追加
-const confirmBtn = document.getElementById("confirm-btn");
-if (confirmBtn) confirmBtn.remove();
+  // 確定ボタン削除
+  const confirmBtn = document.getElementById("confirm-btn");
+  if (confirmBtn) confirmBtn.remove();
 
   // 解除ボタン作成
-if (!document.getElementById("undo-btn")) {
-  const undoBtn = document.createElement("button");
-  undoBtn.id = "undo-btn";
-  undoBtn.textContent = "解除";
+  if (!document.getElementById("undo-btn")) {
+    const undoBtn = document.createElement("button");
+    undoBtn.id = "undo-btn";
+    undoBtn.textContent = "解除";
+    undoBtn.addEventListener("click", undoConfirm);
 
-  // クリックで確定前の状態に戻す
-  undoBtn.addEventListener("click", () => {
-    // マスをテキストボックス化（中央は除く）
-    cells.forEach((td, i) => {
-      if (i !== 12) {
-        const value = td.textContent.trim();
-        td.innerHTML = `<textarea class="cell-input">${value}</textarea>`;
-      }
-    });
-
-    // ランダム配置ボタン復活
-    if (!document.getElementById("random-btn")) {
-      const newRandomBtn = document.createElement("button");
-      newRandomBtn.id = "random-btn";
-      newRandomBtn.textContent = "ランダム配置";
-      newRandomBtn.onclick = randomFill;
-      buttonContainer.insertBefore(newRandomBtn, document.getElementById("reset-btn"));
+    const resetBtn = document.getElementById("reset-btn");
+    if (resetBtn) {
+      buttonContainer.insertBefore(undoBtn, resetBtn.nextSibling);
+    } else {
+      buttonContainer.appendChild(undoBtn);
     }
-
-    // 確定ボタン復活
-if (!document.getElementById("confirm-btn")) {
-  const confirmBtn = document.createElement("button");
-  confirmBtn.id = "confirm-btn";
-  confirmBtn.textContent = "確定";
-
-  // 既存の確定処理と同じ処理をイベントに設定
-  confirmBtn.addEventListener("click", () => {
-    const cells = Array.from(document.querySelectorAll("#bingo td"));
-    const inputs = cells.filter((td, i) => i !== 12)
-                        .map(td => td.querySelector("textarea"));
-
-    const emptyCell = inputs.some(input => !input || input.value.trim() === "");
-    if (emptyCell) {
-      alert("マスを全て埋めてください");
-      return;
-    }
-
-    alert("マスを確定します！\n解除ボタンで変更できます");
-
-    inputs.forEach(input => {
-      const td = input.closest("td");
-      td.innerHTML = `<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;">${input.value}</div>`;
-    });
-
-    confirmed = true;
-
-    const randomBtn = document.getElementById("random-btn");
-    if (randomBtn) randomBtn.remove();
-
-    confirmBtn.remove();
-
-    // 解除ボタン作成（必要なら既存の処理を呼び出す）
-  });
-
-  buttonContainer.insertBefore(confirmBtn, document.getElementById("reset-btn"));
-}
-
-    // 解除ボタン削除
-    undoBtn.remove();
-
-    // 状態を確定前に戻す
-    confirmed = false;
-  });
-
-  // リセットボタンの後に配置
-  const resetBtn = document.getElementById("reset-btn");
-  if (resetBtn) {
-    buttonContainer.insertBefore(undoBtn, resetBtn.nextSibling);
-  } else {
-    buttonContainer.appendChild(undoBtn);
   }
 }
+
+// 確定解除処理
+function undoConfirm() {
+  const cells = Array.from(document.querySelectorAll("#bingo td"));
+  cells.forEach((td, i) => {
+    if (i !== 12) {
+      const value = td.textContent.trim();
+      td.innerHTML = `<textarea class="cell-input">${value}</textarea>`;
+    }
+  });
+
+  // ランダム配置ボタン復活
+  if (!document.getElementById("random-btn")) {
+    const newRandomBtn = document.createElement("button");
+    newRandomBtn.id = "random-btn";
+    newRandomBtn.textContent = "ランダム配置";
+    newRandomBtn.onclick = randomFill;
+    buttonContainer.insertBefore(newRandomBtn, document.getElementById("reset-btn"));
+  }
+
+  // 確定ボタン復活
+  if (!document.getElementById("confirm-btn")) {
+    const confirmBtn = document.createElement("button");
+    confirmBtn.id = "confirm-btn";
+    confirmBtn.textContent = "確定";
+    confirmBtn.onclick = confirmBoard;
+    buttonContainer.insertBefore(confirmBtn, document.getElementById("reset-btn"));
+  }
+
+  // 解除ボタン削除
+  const undoBtn = document.getElementById("undo-btn");
+  if (undoBtn) undoBtn.remove();
+
+  confirmed = false;
+}
+
+// 最初の確定ボタンに処理を設定
+const confirmBtn = document.getElementById("confirm-btn");
+if (confirmBtn) confirmBtn.onclick = confirmBoard;
+    
 });
     
   </script>
