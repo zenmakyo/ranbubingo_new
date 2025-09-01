@@ -520,6 +520,15 @@ if (confirmBtn) confirmBtn.remove();
       newRandomBtn.onclick = randomFill;
       buttonContainer.insertBefore(newRandomBtn, document.getElementById("reset-btn"));
 
+      // 確定ボタン復活
+      if (!document.getElementById("confirm-btn")) {
+      const confirmBtn = document.createElement("button");
+      confirmBtn.id = "confirm-btn";
+      confirmBtn.textContent = "確定";
+      confirmBtn.onclick = confirmBoard; // 確定処理の関数を設定
+      buttonContainer.insertBefore(confirmBtn, document.getElementById("reset-btn")); 
+     }
+      
       // 解除ボタン削除
       undoBtn.remove();
       confirmed = false;
