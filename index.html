@@ -737,9 +737,10 @@ if (confirmBtn) confirmBtn.onclick = confirmBoard;
 
     // セルをクリックで色付け／再クリックで解除
 function toggleCellColor(td) {
-  const overlayColor = "rgba(181, 141, 200, 0.9)";
-  let overlay = td.querySelector(".cell-overlay");
+  td.dataset.clicked = td.dataset.clicked === "true" ? "false" : "true";
 
+  // クリック直後に通常色を反映
+  let overlay = td.querySelector(".cell-overlay");
   if (!overlay) {
     overlay = document.createElement("div");
     overlay.className = "cell-overlay";
@@ -749,19 +750,15 @@ function toggleCellColor(td) {
     overlay.style.width = "100%";
     overlay.style.height = "100%";
     overlay.style.pointerEvents = "none";
-    overlay.style.zIndex = "0";       // 背面に固定
-    td.insertBefore(overlay, td.firstChild); // 文字より下に
+    overlay.style.zIndex = "0"; // 背面
+    td.insertBefore(overlay, td.firstChild);
   }
 
-  if (td.dataset.clicked === "true") {
-    overlay.style.backgroundColor = "";
-    td.dataset.clicked = "false";
-  } else {
-    overlay.style.backgroundColor = overlayColor;
-    td.dataset.clicked = "true";
-  }
-checkBingo();
+  overlay.style.backgroundColor = td.dataset.clicked === "true" 
+                                 ? "rgba(181, 141, 200, 0.9)" // 通常クリック色
+                                 : "";
 
+  checkBingo(); // リーチ・ビンゴ判定で必要に応じて色を上書き
 }
 
    // ------------------------------
