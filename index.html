@@ -525,10 +525,10 @@ function confirmBoard() {
   const inputs = cells.filter((td, i) => i !== 12)
                       .map(td => td.querySelector("textarea"));
 
-  let alertMessage = "名前を入力してください！\nマスを全て埋めてください！";
+  let alertMessage = "";
 
   if (nameInput) {
-    alertMessage += "名前を入力してください！";
+    alertMessage += "名前を入力してください！\n";
   }
 
   const emptyCell = inputs.some(input => !input || input.value.trim() === "");
