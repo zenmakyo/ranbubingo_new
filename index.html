@@ -630,76 +630,69 @@ textCells.forEach(td => {
 // 確定解除処理
 function undoConfirm() {
   const cells = Array.from(document.querySelectorAll("#bingo td"));
- // クリックイベントを解除
-cells.forEach((td, i) => {
-  if (i !== 12) disableCellClick(td);
-});
 
-  // ② オーバーレイの背景色を削除
+  // クリックイベントを解除
+  cells.forEach((td, i) => {
+    if (i !== 12) disableCellClick(td);
+  });
+
+  // オーバーレイの背景色を削除
   cells.forEach(td => {
     const overlay = td.querySelector(".cell-overlay");
     if (overlay) overlay.style.backgroundColor = "";
   });
 
-  // ③ セル内をテキストボックスに戻す
+  // セル内をテキストボックスに戻す
   cells.forEach((td, i) => {
     if (i !== 12) {
       const value = td.textContent.trim();
       td.innerHTML = `
-  <div class="cell-content">
-    <textarea class="cell-input" rows="1" wrap="soft">${value}</textarea>
-  </div>
-`;
+        <div class="cell-content">
+          <textarea class="cell-input" rows="1" wrap="soft">${value}</textarea>
+        </div>
+      `;
     }
   });
 
-  // ランダム配置ボタン復活
-if (!document.getElementById("random-btn")) {
-  const newRandomBtn = document.createElement("button");
-  newRandomBtn.id = "random-btn";
-  newRandomBtn.textContent = "ランダム配置";
-  newRandomBtn.onclick = randomFill;
-  buttonContainer.appendChild(newRandomBtn); // まず最後尾に追加
-}
+  // ■ 先に不要ボタンを削除
+  ["undo-btn", "color-reset-btn", "save-btn"].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) btn.remove();
+  });
 
-// リセットボタン復活
-if (!document.getElementById("reset-btn")) {
-  const resetBtn = document.createElement("button");
-  resetBtn.id = "reset-btn";
-  resetBtn.textContent = "リセット";
-  resetBtn.onclick = resetBoard;
-  buttonContainer.appendChild(resetBtn);
-}
+  // ■ 復活ボタンを順番に作成
+  if (!document.getElementById("random-btn")) {
+    const btn = document.createElement("button");
+    btn.id = "random-btn";
+    btn.textContent = "ランダム配置";
+    btn.onclick = randomFill;
+    buttonContainer.appendChild(btn);
+  }
 
-// 確定ボタン復活
-if (!document.getElementById("confirm-btn")) {
-  const confirmBtn = document.createElement("button");
-  confirmBtn.id = "confirm-btn";
-  confirmBtn.textContent = "確定";
-  confirmBtn.onclick = confirmBoard;
-  buttonContainer.appendChild(confirmBtn);
-}
+  if (!document.getElementById("reset-btn")) {
+    const btn = document.createElement("button");
+    btn.id = "reset-btn";
+    btn.textContent = "リセット";
+    btn.onclick = resetBoard;
+    buttonContainer.appendChild(btn);
+  }
 
-// 読込ボタン復活
-if (!document.getElementById("load-btn")) {
-  const loadBtn = document.createElement("button");
-  loadBtn.id = "load-btn";
-  loadBtn.textContent = "読込";
-  loadBtn.onclick = loadBoard;
-  buttonContainer.appendChild(loadBtn);
-}
+  if (!document.getElementById("confirm-btn")) {
+    const btn = document.createElement("button");
+    btn.id = "confirm-btn";
+    btn.textContent = "確定";
+    btn.onclick = confirmBoard;
+    buttonContainer.appendChild(btn);
+  }
 
-  // 解除ボタン削除
-  const undoBtn = document.getElementById("undo-btn");
-  if (undoBtn) undoBtn.remove();
-
-  // 色リセットボタン削除
-  const colorResetBtn = document.getElementById("color-reset-btn");
-  if (colorResetBtn) colorResetBtn.remove();
-
-  // 保存ボタン削除
-  const saveBtn = document.getElementById("save-btn");
-  if (saveBtn) saveBtn.remove();
+  // 読込ボタン復活
+  if (!document.getElementById("load-btn")) {
+    const btn = document.createElement("button");
+    btn.id = "load-btn";
+    btn.textContent = "読込";
+    btn.onclick = loadBoard;
+    buttonContainer.appendChild(btn);
+  }
 
   confirmed = false;
 }
