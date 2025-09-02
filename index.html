@@ -157,6 +157,8 @@
   <button id="random-btn" onclick="randomFill()">ランダム配置</button>
   <button id="reset-btn" onclick="resetBoard()">リセット</button>
   <button id="confirm-btn">確定</button>
+  <br>
+  <button id="save-btn">保存</button>
   </div>
 
   <script>
@@ -707,6 +709,84 @@ function toggleCellColor(td) {
     td.dataset.clicked = "true";
   }
 }
+
+    // 保存ボタンに処理を設定
+document.getElementById("save-btn").addEventListener("click", saveBoard);
+
+function saveBoard() {
+  const cells = Array.from(document.querySelectorAll("#bingo td"));
+  const boardData = cells.map(td => {
+    const input = td.querySelector("textarea");
+    const text = input ? input.value : td.textContent.trim();
+    const clicked = td.dataset.clicked || "false";
+    return { text, clicked };
+  });
+
+  localStorage.setItem("bingoBoard", JSON.stringify({
+    boardData,
+    confirmed
+  }));
+
+  alert("保存しました！");
+}
+
+// ページロード時に復元
+window.addEventListener("load", () => {
+  const saved = localStorage.getItem("bingoBoard");
+  if (!saved) return;
+
+  const { boardData, confirmed: savedConfirmed } = JSON.parse(saved);
+  const cells = Array.from(document.querySelectorAll("#bingo td"));
+
+  boardData.forEach((data, i) => {
+    const td = cells[i];
+    if (i === 12) return; // 中央フリーはスキップ
+
+    if (savedConfirmed) {
+      td.innerHTML = '<div class="cell-text-wrapper"><div class="cell-text">' + data.text + '</div></div>';
+      if (data.clicked === "true") toggleCellColor(td);
+      enableCellClick(td);
+    } else {
+      td.innerHTML = `
+        <div class="cell-content">
+          <textarea class="cell-input" rows="1" wrap="soft">${data.text}</textarea>
+        </div>
+      `;
+    }
+  });
+
+  confirmed = savedConfirmed;
+
+  if (confirmed) {
+    // 確定後のボタンUI復元
+    document.getElementById("random-btn")?.remove();
+    document.getElementById("confirm-btn")?.remove();
+    document.getElementById("reset-btn")?.remove();
+
+    if (!document.getElementById("undo-btn")) {
+      const undoBtn = document.createElement("button");
+      undoBtn.id = "undo-btn";
+      undoBtn.textContent = "解除";
+      undoBtn.addEventListener("click", undoConfirm);
+      document.querySelector(".button-container").appendChild(undoBtn);
+    }
+
+    if (!document.getElementById("color-reset-btn")) {
+      const colorResetBtn = document.createElement("button");
+      colorResetBtn.id = "color-reset-btn";
+      colorResetBtn.textContent = "色リセット";
+      colorResetBtn.onclick = () => {
+        const cells = document.querySelectorAll("#bingo td");
+        cells.forEach(td => {
+          const overlay = td.querySelector(".cell-overlay");
+          if (overlay) overlay.style.backgroundColor = "";
+          td.dataset.clicked = "false";
+        });
+      };
+      document.querySelector(".button-container").appendChild(colorResetBtn);
+    }
+  }
+});
     
   </script>
 </body>
