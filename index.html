@@ -535,8 +535,9 @@ function confirmBoard() {
     colorResetBtn.onclick = () => {
   const cells = document.querySelectorAll("#bingo td");
   cells.forEach(td => {
-    td.style.backgroundColor = "";  // セルの色をリセット
-    td.dataset.clicked = "false";   // クリック状態もリセット
+    const overlay = td.querySelector(".cell-overlay");
+    if (overlay) overlay.style.backgroundColor = "";
+    td.dataset.clicked = "false";
   });
 };
     buttonContainer.appendChild(colorResetBtn);
@@ -623,11 +624,27 @@ if (confirmBtn) confirmBtn.onclick = confirmBoard;
 
     // セルをクリックで色付け／再クリックで解除
 function toggleCellColor(td) {
+  const overlayColor = "rgba(255, 255, 153, 0.6)"; // セル内オーバーレイ色
+
   if (!td.dataset.clicked || td.dataset.clicked === "false") {
-    td.style.backgroundColor = "#ffff99"; // 任意の色
+    // オーバーレイ用の div を作る
+    let overlay = td.querySelector(".cell-overlay");
+    if (!overlay) {
+      overlay = document.createElement("div");
+      overlay.className = "cell-overlay";
+      overlay.style.position = "absolute";
+      overlay.style.top = "0";
+      overlay.style.left = "0";
+      overlay.style.width = "100%";
+      overlay.style.height = "100%";
+      overlay.style.pointerEvents = "none"; // クリック透過
+      td.appendChild(overlay);
+    }
+    overlay.style.backgroundColor = overlayColor;
     td.dataset.clicked = "true";
   } else {
-    td.style.backgroundColor = ""; // 元の色に戻す
+    const overlay = td.querySelector(".cell-overlay");
+    if (overlay) overlay.style.backgroundColor = "";
     td.dataset.clicked = "false";
   }
 }
