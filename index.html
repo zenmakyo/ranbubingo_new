@@ -520,24 +520,29 @@ function disableCellClick(td) {
 
 // 共通の確定処理
 function confirmBoard() {
-  // 名前入力チェック
   const nameInput = document.getElementById("player-name");
-  if (nameInput) {
-    alert("名前を入力してください！");
-    return;
-  }
   const cells = Array.from(document.querySelectorAll("#bingo td"));
   const inputs = cells.filter((td, i) => i !== 12)
                       .map(td => td.querySelector("textarea"));
 
+  let alertMessage = "名前を入力してください！\nマスを全て埋めてください！";
+
+  if (nameInput) {
+    alertMessage += "名前を入力してください！";
+  }
+
   const emptyCell = inputs.some(input => !input || input.value.trim() === "");
   if (emptyCell) {
-    alert("マスを全て埋めてください");
+    alertMessage += "マスを全て埋めてください！";
+  }
+
+  if (alertMessage) {
+    alert(alertMessage);
     return;
   }
 
-  alert("マスを確定します！\n解除ボタンで再配置できます");
-
+  alert("マスを確定します！\n解除ボタンで再配置できます！");
+  
     // まず全セルのオーバーレイ削除＋クリック状態リセット
   cells.forEach((td, i) => {
     if (i !== 12) { // 中央は対象外
