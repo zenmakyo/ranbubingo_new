@@ -827,21 +827,26 @@ function loadBoard() {
 
   // まず全セルリセット
   cells.forEach(td => {
-    let overlay = td.querySelector(".cell-overlay");
-    if (!overlay) {
-      overlay = document.createElement("div");
-      overlay.className = "cell-overlay";
-      overlay.style.position = "absolute";
-      overlay.style.top = "0";
-      overlay.style.left = "0";
-      overlay.style.width = "100%";
-      overlay.style.height = "100%";
-      overlay.style.pointerEvents = "none";
-      overlay.style.zIndex = "0";
-      td.insertBefore(overlay, td.firstChild);
-    }
+  let overlay = td.querySelector(".cell-overlay");
+  if (!overlay) {
+    overlay = document.createElement("div");
+    overlay.className = "cell-overlay";
+    overlay.style.position = "absolute";
+    overlay.style.top = "0";
+    overlay.style.left = "0";
+    overlay.style.width = "100%";
+    overlay.style.height = "100%";
+    overlay.style.pointerEvents = "none";
+    overlay.style.zIndex = "0";
+    td.insertBefore(overlay, td.firstChild);
+  }
+  // クリック済みセルはそのまま色を維持
+  if (td.dataset.clicked === "true") {
+    overlay.style.backgroundColor = "rgba(181, 141, 200, 0.9)"; // 通常クリック色
+  } else {
     overlay.style.backgroundColor = "";
-  });
+  }
+});
 
   let reachCount = 0;
   let bingoCount = 0;
