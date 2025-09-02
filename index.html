@@ -868,6 +868,10 @@ function loadBoard() {
     }
   });
 
+      // 列数を計算
+const reachCount = newReachLines.size;
+const bingoCount = newBingoLines.size;
+
   // リーチセルに赤枠
   reachCells.forEach(i => {
     const overlay = cells[i].querySelector(".cell-overlay");
