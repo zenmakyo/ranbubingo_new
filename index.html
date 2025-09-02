@@ -92,13 +92,17 @@
       background-color: #eee;
     }
     .cell-text {
-      font-size: 2.5vmin;      /* 入力と同じスケール */
-      text-align: center;
-      word-break: break-word;  /* 長い単語も折り返し */
-      overflow-wrap: break-word;
-      white-space: pre-wrap;   /* 改行を保持して折り返し */
       max-width: 90%;
       max-height: 90%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5vmin;
+      text-align: center;
+      word-break: break-word;
+      overflow-wrap: break-word;
+      padding: 5%;
+      box-sizing: border-box;
     }
     .button-container {
       margin: 1rem auto;
