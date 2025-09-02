@@ -727,96 +727,34 @@ document.getElementById("save-btn").addEventListener("click", saveBoard);
 function saveBoard() {
   const cells = Array.from(document.querySelectorAll("#bingo td"));
   const boardData = cells.map(td => {
-    const input = td.querySelector("textarea");
-    const text = input ? input.value : td.textContent.trim();
-    const clicked = td.dataset.clicked || "false"; // セルのクリック状態も保持
-    return { text, clicked };
+    // textareaがあればその値を取得、無ければテキスト化されている値を取得
+    const text = td.querySelector("textarea")?.value || td.textContent.trim();
+    return { text };
   });
 
-  localStorage.setItem("bingoBoard", JSON.stringify({
-    boardData,
-    confirmed
-  }));
+  localStorage.setItem("bingoBoard", JSON.stringify({ boardData }));
 
   alert("保存しました！");
 }
 
-// ページロード時の復元
+// ページ読み込み時の復元
 window.addEventListener("load", () => {
   const saved = localStorage.getItem("bingoBoard");
   if (!saved) return;
 
-  const { boardData, confirmed: savedConfirmed } = JSON.parse(saved);
+  const { boardData } = JSON.parse(saved);
   const cells = Array.from(document.querySelectorAll("#bingo td"));
 
   boardData.forEach((data, i) => {
     const td = cells[i];
     if (i === 12) return; // 中央フリーはスキップ
 
-    // 確定後状態の場合
-    if (savedConfirmed) {
-      td.innerHTML = '<div class="cell-text-wrapper"><div class="cell-text">' + data.text + '</div></div>';
-
-      // 保存されたテキストを元に背景色を設定
-      const textWrapper = td.querySelector(".cell-text-wrapper");
-      const val = data.text;
-      if (rainbowWords.includes(val)) {
-        textWrapper.style.background = "linear-gradient(135deg, #f4d7f4, #d6c6e1, #c0d4f7, #bde5c8, #fffabf, #ffe4b5, #f7b3b3)";
-      } else if (roseWord.includes(val)) {
-        textWrapper.style.background = "#c05d69";
-      } else if (mixWords.includes(val)) {
-        textWrapper.style.background = `linear-gradient(
-          120deg,
-          #f4d7f4 0%, #d6c6e1 9%, #c0d4f7 18%, #bde5c8 27%, #fffabf 36%, #ffe4b5 45%, #f7b3b3 54%, #ccc 63%, #ccc 100%
-        )`;
-      } else {
-        textWrapper.style.background = "#ccc";
-      }
-
-      if (data.clicked === "true") enableCellClick(td);
-      else disableCellClick(td);
-
-    } else {
-      // 確定前状態なら textarea に戻す
-      td.innerHTML = `
-        <div class="cell-content">
-          <textarea class="cell-input" rows="1" wrap="soft">${data.text}</textarea>
-        </div>
-      `;
+    // 確定前の状態（空のテキストボックス）にテキストを入力
+    const textarea = td.querySelector("textarea");
+    if (textarea) {
+      textarea.value = data.text;
     }
   });
-
-  confirmed = savedConfirmed;
-
-  if (confirmed) {
-    // 確定後ボタンUI復元
-    document.getElementById("random-btn")?.remove();
-    document.getElementById("confirm-btn")?.remove();
-    document.getElementById("reset-btn")?.remove();
-
-    if (!document.getElementById("undo-btn")) {
-      const undoBtn = document.createElement("button");
-      undoBtn.id = "undo-btn";
-      undoBtn.textContent = "解除";
-      undoBtn.addEventListener("click", undoConfirm);
-      document.querySelector(".button-container").appendChild(undoBtn);
-    }
-
-    if (!document.getElementById("color-reset-btn")) {
-      const colorResetBtn = document.createElement("button");
-      colorResetBtn.id = "color-reset-btn";
-      colorResetBtn.textContent = "色リセット";
-      colorResetBtn.onclick = () => {
-        const cells = document.querySelectorAll("#bingo td");
-        cells.forEach(td => {
-          const textWrapper = td.querySelector(".cell-text-wrapper");
-          if (textWrapper) textWrapper.style.background = "";
-          td.dataset.clicked = "false";
-        });
-      };
-      document.querySelector(".button-container").appendChild(colorResetBtn);
-    }
-  }
 });
     
   </script>
