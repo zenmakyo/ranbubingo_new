@@ -721,7 +721,7 @@ function toggleCellColor(td) {
   }
 }
 
-    // 保存ボタン
+    // 保存ボタン処理
 document.getElementById("save-btn").addEventListener("click", saveBoard);
 
 function saveBoard() {
@@ -730,7 +730,7 @@ function saveBoard() {
     const input = td.querySelector("textarea");
     const text = input ? input.value : td.textContent.trim();
     const clicked = td.dataset.clicked || "false";
-    const background = td.style.background || ""; // ← 背景も保存
+    const background = td.querySelector(".cell-text-wrapper")?.style.background || td.style.background || "";
     return { text, clicked, background };
   });
 
@@ -742,7 +742,7 @@ function saveBoard() {
   alert("保存しました！");
 }
 
-// ページロード時に復元
+// ページロード時の復元
 window.addEventListener("load", () => {
   const saved = localStorage.getItem("bingoBoard");
   if (!saved) return;
@@ -754,16 +754,29 @@ window.addEventListener("load", () => {
     const td = cells[i];
     if (i === 12) return; // 中央フリーはスキップ
 
-    if (savedConfirmed) {
-      td.innerHTML = '<div class="cell-text-wrapper"><div class="cell-text">' + data.text + '</div></div>';
-
-      // 保存されていた背景を復元
-      const textWrapper = td.querySelector(".cell-text-wrapper");
-      textWrapper.style.background = data.background || "";
-
-      if (data.clicked === "true") enableCellClick(td);
-      else disableCellClick(td);
+    // textWrapper が既にあるか確認
+    let textWrapper = td.querySelector(".cell-text-wrapper");
+    if (!textWrapper) {
+      textWrapper = document.createElement("div");
+      textWrapper.className = "cell-text-wrapper";
+      const innerDiv = document.createElement("div");
+      innerDiv.className = "cell-text";
+      innerDiv.textContent = data.text;
+      textWrapper.appendChild(innerDiv);
+      td.innerHTML = "";
+      td.appendChild(textWrapper);
     } else {
+      textWrapper.querySelector(".cell-text").textContent = data.text;
+    }
+
+    // 背景色を復元
+    textWrapper.style.background = data.background || "";
+
+    if (savedConfirmed && data.clicked === "true") enableCellClick(td);
+    else disableCellClick(td);
+
+    // 確定前の状態なら textarea に戻す
+    if (!savedConfirmed) {
       td.innerHTML = `
         <div class="cell-content">
           <textarea class="cell-input" rows="1" wrap="soft">${data.text}</textarea>
