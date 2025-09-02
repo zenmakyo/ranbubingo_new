@@ -729,9 +729,8 @@ function saveBoard() {
   const boardData = cells.map(td => {
     const input = td.querySelector("textarea");
     const text = input ? input.value : td.textContent.trim();
-    const clicked = td.dataset.clicked || "false";
-    const background = td.querySelector(".cell-text-wrapper")?.style.background || td.style.background || "";
-    return { text, clicked, background };
+    const clicked = td.dataset.clicked || "false"; // セルのクリック状態も保持
+    return { text, clicked };
   });
 
   localStorage.setItem("bingoBoard", JSON.stringify({
@@ -754,29 +753,31 @@ window.addEventListener("load", () => {
     const td = cells[i];
     if (i === 12) return; // 中央フリーはスキップ
 
-    // textWrapper が既にあるか確認
-    let textWrapper = td.querySelector(".cell-text-wrapper");
-    if (!textWrapper) {
-      textWrapper = document.createElement("div");
-      textWrapper.className = "cell-text-wrapper";
-      const innerDiv = document.createElement("div");
-      innerDiv.className = "cell-text";
-      innerDiv.textContent = data.text;
-      textWrapper.appendChild(innerDiv);
-      td.innerHTML = "";
-      td.appendChild(textWrapper);
+    // 確定後状態の場合
+    if (savedConfirmed) {
+      td.innerHTML = '<div class="cell-text-wrapper"><div class="cell-text">' + data.text + '</div></div>';
+
+      // 保存されたテキストを元に背景色を設定
+      const textWrapper = td.querySelector(".cell-text-wrapper");
+      const val = data.text;
+      if (rainbowWords.includes(val)) {
+        textWrapper.style.background = "linear-gradient(135deg, #f4d7f4, #d6c6e1, #c0d4f7, #bde5c8, #fffabf, #ffe4b5, #f7b3b3)";
+      } else if (roseWord.includes(val)) {
+        textWrapper.style.background = "#c05d69";
+      } else if (mixWords.includes(val)) {
+        textWrapper.style.background = `linear-gradient(
+          120deg,
+          #f4d7f4 0%, #d6c6e1 9%, #c0d4f7 18%, #bde5c8 27%, #fffabf 36%, #ffe4b5 45%, #f7b3b3 54%, #ccc 63%, #ccc 100%
+        )`;
+      } else {
+        textWrapper.style.background = "#ccc";
+      }
+
+      if (data.clicked === "true") enableCellClick(td);
+      else disableCellClick(td);
+
     } else {
-      textWrapper.querySelector(".cell-text").textContent = data.text;
-    }
-
-    // 背景色を復元
-    textWrapper.style.background = data.background || "";
-
-    if (savedConfirmed && data.clicked === "true") enableCellClick(td);
-    else disableCellClick(td);
-
-    // 確定前の状態なら textarea に戻す
-    if (!savedConfirmed) {
+      // 確定前状態なら textarea に戻す
       td.innerHTML = `
         <div class="cell-content">
           <textarea class="cell-input" rows="1" wrap="soft">${data.text}</textarea>
@@ -788,7 +789,7 @@ window.addEventListener("load", () => {
   confirmed = savedConfirmed;
 
   if (confirmed) {
-    // 確定後のボタンUI復元
+    // 確定後ボタンUI復元
     document.getElementById("random-btn")?.remove();
     document.getElementById("confirm-btn")?.remove();
     document.getElementById("reset-btn")?.remove();
