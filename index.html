@@ -613,7 +613,7 @@ if (!document.getElementById("color-reset-btn")) {
   colorResetBtn.onclick = () => {
     const cells = document.querySelectorAll("#bingo td");
     cells.forEach(td => {
-      // まず overlay があるかチェック
+      // overlay があるかチェック
       let overlay = td.querySelector(".cell-overlay");
       if (!overlay) {
         // なければ作って文字の下に配置
@@ -628,10 +628,27 @@ if (!document.getElementById("color-reset-btn")) {
         overlay.style.zIndex = "0";           // 文字の下
         td.insertBefore(overlay, td.firstChild);
       }
-      // 背景色リセット
+
+      // 中央セルはクリック済み状態を維持
+      if (!(td.dataset.row === "2" && td.dataset.col === "2")) {
+        td.dataset.clicked = "false";
+      }
+
+      // 背景色と赤枠リセット
       overlay.style.backgroundColor = "";
-      td.dataset.clicked = "false";
+      overlay.style.border = "";
     });
+
+    // 中央セルだけクリック済み色を再反映
+    const centerCell = document.querySelector("#bingo td[data-row='2'][data-col='2']");
+    const centerOverlay = centerCell.querySelector(".cell-overlay");
+    if (centerOverlay) {
+      centerOverlay.style.backgroundColor = "rgba(181, 141, 200, 0.9)";
+    }
+
+    // リーチ・ビンゴのカウントもリセット
+    prevReachCount = 0;
+    prevBingoCount = 0;
   };
   buttonContainer.appendChild(colorResetBtn);
 }
