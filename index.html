@@ -885,6 +885,11 @@ function loadBoard() {
     }
   });
 
+      // ビンゴになったラインはリーチから除外
+  newBingoLines.forEach(line => {
+    newReachLines.delete(line);
+  });
+
       // 列数を計算
 const reachCount = newReachLines.size;
 const bingoCount = newBingoLines.size;
