@@ -742,7 +742,7 @@ function saveBoard() {
   alert("保存しました！");
 }
 
-// 復元
+// ページロード時に復元
 window.addEventListener("load", () => {
   const saved = localStorage.getItem("bingoBoard");
   if (!saved) return;
@@ -775,7 +775,7 @@ window.addEventListener("load", () => {
   confirmed = savedConfirmed;
 
   if (confirmed) {
-    // ボタンUI復元は既存のまま
+    // 確定後のボタンUI復元
     document.getElementById("random-btn")?.remove();
     document.getElementById("confirm-btn")?.remove();
     document.getElementById("reset-btn")?.remove();
