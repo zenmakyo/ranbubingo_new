@@ -563,7 +563,7 @@ function confirmBoard() {
 
   // 読込ボタン削除
 const loadBtn = document.getElementById("load-btn");
-if (loadBtn) loadBtn.style.display = "none";
+if (loadBtn) loadBtn.remove();
 
   // 保存ボタン作成
 if (!document.getElementById("save-btn")) {
