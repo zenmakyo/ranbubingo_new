@@ -54,7 +54,6 @@
       justify-content: center;
       padding: 5%;
       box-sizing: border-box;
-      position: relative;
     }
     .cell-input {
       width: 85%;
@@ -62,7 +61,6 @@
       box-sizing: border-box;
       font-size: 2.5vmin;
       text-align: center;
-      position: relative;
 
       display: flex;            /* 追加 */
       align-items: center;      /* 垂直中央 */
@@ -562,7 +560,11 @@ function undoConfirm() {
   cells.forEach((td, i) => {
     if (i !== 12) {
       const value = td.textContent.trim();
-      td.innerHTML = `<textarea class="cell-input">${value}</textarea>`;
+      td.innerHTML = `
+  <div class="cell-content">
+    <textarea class="cell-input" rows="1" wrap="soft">${value}</textarea>
+  </div>
+`;
     }
   });
 
