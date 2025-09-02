@@ -497,6 +497,26 @@ function showAllSuggestions(suggestionBox) {
 const buttonContainer = document.querySelector(".button-container");
 let confirmed = false;
 
+// セルクリックイベントを管理するマップ
+const cellClickHandlers = new Map();
+
+function enableCellClick(td) {
+  if (cellClickHandlers.has(td)) return; // 二重登録防止
+  const handler = () => toggleCellColor(td);
+  td.addEventListener("click", handler);
+  cellClickHandlers.set(td, handler);
+  td.style.cursor = "pointer";
+}
+
+function disableCellClick(td) {
+  const handler = cellClickHandlers.get(td);
+  if (handler) {
+    td.removeEventListener("click", handler);
+    cellClickHandlers.delete(td);
+  }
+  td.style.cursor = "default";
+}
+
 // 共通の確定処理
 function confirmBoard() {
   const cells = Array.from(document.querySelectorAll("#bingo td"));
@@ -589,18 +609,17 @@ if (!document.getElementById("color-reset-btn")) {
 const textCells = document.querySelectorAll("#bingo td");
 textCells.forEach(td => {
   if (td.dataset.row === "2" && td.dataset.col === "2") return; // 中央フリーはスキップ
-  td.addEventListener("click", () => toggleCellColor(td));
-  td.style.cursor = "pointer"; // クリックできることを示す
+  enableCellClick(td);
 });
 }
 
 // 確定解除処理
 function undoConfirm() {
   const cells = Array.from(document.querySelectorAll("#bingo td"));
- // ① まず全セルのクリック状態をリセット
-  cells.forEach((td, i) => {
-    if (i !== 12) td.dataset.clicked = "false";
-  });
+ // クリックイベントを解除
+cells.forEach((td, i) => {
+  if (i !== 12) disableCellClick(td);
+});
 
   // ② オーバーレイの背景色を削除
   cells.forEach(td => {
