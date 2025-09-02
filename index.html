@@ -710,7 +710,7 @@ function toggleCellColor(td) {
   }
 }
 
-    // 保存ボタンに処理を設定
+    // 保存ボタン
 document.getElementById("save-btn").addEventListener("click", saveBoard);
 
 function saveBoard() {
@@ -719,7 +719,8 @@ function saveBoard() {
     const input = td.querySelector("textarea");
     const text = input ? input.value : td.textContent.trim();
     const clicked = td.dataset.clicked || "false";
-    return { text, clicked };
+    const background = td.style.background || ""; // ← 背景も保存
+    return { text, clicked, background };
   });
 
   localStorage.setItem("bingoBoard", JSON.stringify({
@@ -730,7 +731,7 @@ function saveBoard() {
   alert("保存しました！");
 }
 
-// ページロード時に復元
+// 復元
 window.addEventListener("load", () => {
   const saved = localStorage.getItem("bingoBoard");
   if (!saved) return;
@@ -745,17 +746,9 @@ window.addEventListener("load", () => {
     if (savedConfirmed) {
       td.innerHTML = '<div class="cell-text-wrapper"><div class="cell-text">' + data.text + '</div></div>';
 
-      // 背景色を再判定
+      // 保存されていた背景を復元
       const textWrapper = td.querySelector(".cell-text-wrapper");
-      if (rainbowWords.includes(data.text)) {
-        textWrapper.style.background = "linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet)";
-      } else if (roseWord.includes(data.text)) {
-        textWrapper.style.background = "pink";
-      } else if (mixWords.includes(data.text)) {
-        textWrapper.style.background = "lightgoldenrodyellow";
-      } else {
-        textWrapper.style.background = "lightgray";
-      }
+      textWrapper.style.background = data.background || "";
 
       if (data.clicked === "true") enableCellClick(td);
       else disableCellClick(td);
@@ -771,7 +764,7 @@ window.addEventListener("load", () => {
   confirmed = savedConfirmed;
 
   if (confirmed) {
-    // 確定後のボタンUI復元
+    // ボタンUI復元は既存のまま
     document.getElementById("random-btn")?.remove();
     document.getElementById("confirm-btn")?.remove();
     document.getElementById("reset-btn")?.remove();
