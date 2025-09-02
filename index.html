@@ -911,12 +911,12 @@ const bingoCount = newBingoLines.size;
     });
   });
 
-  // メッセージ作成（前回から変化があれば出す）
+  // メッセージ作成（列数が「増えたときだけ」出す）
 let message = "";
-if (reachCount > 0 && reachCount !== prevReachCount) {
+if (reachCount > prevReachCount) {
   message += `リーチ ${reachCount}列！\n`;
 }
-if (bingoCount > 0 && bingoCount !== prevBingoCount) {
+if (bingoCount > prevBingoCount) {
   message += `ビンゴ ${bingoCount}列！\nおめでとうございます！`;
 }
 
