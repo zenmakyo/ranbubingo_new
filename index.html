@@ -101,6 +101,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      position: relative; /* 追加：オーバーレイと重ねるため */
+      z-index: 1;         /* 追加：テキストをオーバーレイの上に表示 */
     }
     .cell-text {
       max-width: 90%;
@@ -114,6 +116,8 @@
       overflow-wrap: break-word;
       padding: 0;
       box-sizing: border-box;
+      position: relative; /* 追加：必要に応じてテキストをオーバーレイ上に */
+      z-index: 2;         /* 追加：より前面に表示 */
     }
     .button-container {
       margin: 1rem auto;
@@ -638,7 +642,7 @@ function toggleCellColor(td) {
       overlay.style.width = "100%";
       overlay.style.height = "100%";
       overlay.style.pointerEvents = "none"; // クリック透過
-      td.appendChild(overlay);
+      td.insertBefore(overlay, td.firstChild);
     }
     overlay.style.backgroundColor = overlayColor;
     td.dataset.clicked = "true";
