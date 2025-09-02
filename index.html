@@ -816,8 +816,8 @@ function loadBoard() {
   alert("保存データを読み込みました");
 }
 
-    let lastReachLines = new Set();
-    let lastBingoLines = new Set();
+    let prevReachCount = 0;
+    let prevBingoCount = 0;
 
     function checkBingo() {
   const cells = Array.from(document.querySelectorAll("#bingo td"));
@@ -885,19 +885,21 @@ function loadBoard() {
     });
   });
 
-  // アラート出力（前回から変化があった列のみ）
-  const newReachCount = [...newReachLines].filter(s => !lastReachLines.has(s)).length;
-  const newBingoCount = [...newBingoLines].filter(s => !lastBingoLines.has(s)).length;
+  // メッセージ作成（前回から変化があれば出す）
+let message = "";
+if (reachCount > 0 && reachCount !== prevReachCount) {
+  message += `リーチ ${reachCount}列！\n`;
+}
+if (bingoCount > 0 && bingoCount !== prevBingoCount) {
+  message += `ビンゴ ${bingoCount}列！\nおめでとうございます！`;
+}
 
-  let message = "";
-  if (newReachCount > 0) message += `リーチ ${newReachCount}列！\n`;
-  if (newBingoCount > 0) message += `ビンゴ ${newBingoCount}列！\nおめでとうございます！`;
+// メッセージがあれば表示
+if (message) alert(message);
 
-  if (message) alert(message);
-
-  // 状態を更新
-  lastReachLines = newReachLines;
-  lastBingoLines = newBingoLines;
+// 前回の列数を更新
+prevReachCount = reachCount;
+prevBingoCount = bingoCount;
 }
     
   </script>
