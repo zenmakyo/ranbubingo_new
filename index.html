@@ -560,6 +560,26 @@ function confirmBoard() {
 
   confirmed = true;
 
+  // 確定後、中央セルをクリック済み扱いにする
+const centerCell = document.querySelector("#bingo td[data-row='2'][data-col='2']");
+centerCell.dataset.clicked = "true";
+
+// 中央セルに overlay を作っておく（後でビンゴ判定で色付け用）
+let overlay = centerCell.querySelector(".cell-overlay");
+if (!overlay) {
+  overlay = document.createElement("div");
+  overlay.className = "cell-overlay";
+  overlay.style.position = "absolute";
+  overlay.style.top = "0";
+  overlay.style.left = "0";
+  overlay.style.width = "100%";
+  overlay.style.height = "100%";
+  overlay.style.pointerEvents = "none";
+  overlay.style.zIndex = "0"; // 背面
+  centerCell.insertBefore(overlay, centerCell.firstChild);
+}
+
+
   // ランダム配置ボタン削除
   const randomBtn = document.getElementById("random-btn");
   if (randomBtn) randomBtn.remove();
@@ -636,6 +656,10 @@ textCells.forEach(td => {
   if (td.dataset.row === "2" && td.dataset.col === "2") return; // 中央フリーはスキップ
   enableCellClick(td);
 });
+
+  // 確定後、クリック有効化のあとに
+checkBingo();
+
 }
 
 // 確定解除処理
@@ -713,7 +737,7 @@ if (confirmBtn) confirmBtn.onclick = confirmBoard;
 
     // セルをクリックで色付け／再クリックで解除
 function toggleCellColor(td) {
-  const overlayColor = "rgba(255, 255, 153, 0.6)";
+  const overlayColor = "rgba(181, 141, 200, 0.9)";
   let overlay = td.querySelector(".cell-overlay");
 
   if (!overlay) {
@@ -736,6 +760,8 @@ function toggleCellColor(td) {
     overlay.style.backgroundColor = overlayColor;
     td.dataset.clicked = "true";
   }
+checkBingo();
+
 }
 
    // ------------------------------
@@ -791,6 +817,74 @@ function loadBoard() {
   });
 
   alert("保存データを読み込みました");
+}
+
+    function checkBingo() {
+  const cells = Array.from(document.querySelectorAll("#bingo td"));
+
+  const lines = [
+    [0,1,2,3,4],[5,6,7,8,9],[10,11,12,13,14],[15,16,17,18,19],[20,21,22,23,24], // 横
+    [0,5,10,15,20],[1,6,11,16,21],[2,7,12,17,22],[3,8,13,18,23],[4,9,14,19,24], // 縦
+    [0,6,12,18,24],[4,8,12,16,20] // 斜め
+  ];
+
+  // まず全セルリセット
+  cells.forEach(td => {
+    let overlay = td.querySelector(".cell-overlay");
+    if (!overlay) {
+      overlay = document.createElement("div");
+      overlay.className = "cell-overlay";
+      overlay.style.position = "absolute";
+      overlay.style.top = "0";
+      overlay.style.left = "0";
+      overlay.style.width = "100%";
+      overlay.style.height = "100%";
+      overlay.style.pointerEvents = "none";
+      overlay.style.zIndex = "0";
+      td.insertBefore(overlay, td.firstChild);
+    }
+    overlay.style.backgroundColor = "";
+  });
+
+  let reachCount = 0;
+  let bingoCount = 0;
+  let reachCells = [];
+  let bingoLines = [];
+
+  lines.forEach(line => {
+    const filled = line.filter(i => cells[i].dataset.clicked === "true");
+
+    if (filled.length === 5) {
+      bingoCount++;
+      bingoLines.push(line);
+    } else if (filled.length === 4) {
+      const remaining = line.find(i => cells[i].dataset.clicked !== "true");
+      if (remaining !== undefined) {
+        reachCount++;
+        reachCells.push(remaining);
+      }
+    }
+  });
+
+  // リーチセルに色付け
+  reachCells.forEach(i => {
+    const overlay = cells[i].querySelector(".cell-overlay");
+    overlay.style.backgroundColor = "rgba(255, 255, 153, 0.9)"; // リーチ色
+  });
+
+  // ビンゴセルに色付け
+  bingoLines.forEach(line => {
+    line.forEach(i => {
+      const overlay = cells[i].querySelector(".cell-overlay");
+      overlay.style.backgroundColor = "rgba(255, 0, 0, 0.9)"; // ビンゴ色
+    });
+  });
+
+  // メッセージ
+  let message = "";
+  if (reachCount > 0) message += `リーチ ${reachCount}列！\n`;
+  if (bingoCount > 0) message += `ビンゴ ${bingoCount}列！\nおめでとうございます！`;
+  if (message) alert(message);
 }
     
   </script>
