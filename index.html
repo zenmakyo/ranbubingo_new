@@ -541,34 +541,31 @@ function undoConfirm() {
   });
 
   // ランダム配置ボタン復活
-  if (!document.getElementById("random-btn")) {
-    const newRandomBtn = document.createElement("button");
-    newRandomBtn.id = "random-btn";
-    newRandomBtn.textContent = "ランダム配置";
-    newRandomBtn.onclick = randomFill;
-    buttonContainer.insertBefore(newRandomBtn, document.getElementById("reset-btn"));
-  }
+if (!document.getElementById("random-btn")) {
+  const newRandomBtn = document.createElement("button");
+  newRandomBtn.id = "random-btn";
+  newRandomBtn.textContent = "ランダム配置";
+  newRandomBtn.onclick = randomFill;
+  buttonContainer.appendChild(newRandomBtn); // まず最後尾に追加
+}
 
-  // リセットボタン復活（先に追加して最後尾に置く）
-  if (!document.getElementById("reset-btn")) {
-    const resetBtn = document.createElement("button");
-    resetBtn.id = "reset-btn";
-    resetBtn.textContent = "リセット";
-    resetBtn.onclick = resetBoard;
-    buttonContainer.appendChild(resetBtn);
-  }
+// リセットボタン復活
+if (!document.getElementById("reset-btn")) {
+  const resetBtn = document.createElement("button");
+  resetBtn.id = "reset-btn";
+  resetBtn.textContent = "リセット";
+  resetBtn.onclick = resetBoard;
+  buttonContainer.appendChild(resetBtn);
+}
 
-  // 確定ボタン復活（リセットの前に挿入）
-  if (!document.getElementById("confirm-btn")) {
-    const confirmBtn = document.createElement("button");
-    confirmBtn.id = "confirm-btn";
-    confirmBtn.textContent = "確定";
-    confirmBtn.onclick = confirmBoard;
-    const resetBtn = document.getElementById("reset-btn");
-    if (resetBtn) {
-      buttonContainer.insertBefore(confirmBtn, resetBtn);
-    }
-  }
+// 確定ボタン復活
+if (!document.getElementById("confirm-btn")) {
+  const confirmBtn = document.createElement("button");
+  confirmBtn.id = "confirm-btn";
+  confirmBtn.textContent = "確定";
+  confirmBtn.onclick = confirmBoard;
+  buttonContainer.appendChild(confirmBtn);
+}
 
   // 解除ボタン削除
   const undoBtn = document.getElementById("undo-btn");
