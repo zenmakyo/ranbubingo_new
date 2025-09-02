@@ -506,11 +506,7 @@ function confirmBoard() {
   // セルをテキスト表示に変更
   inputs.forEach(input => {
   const td = input.closest("td");
-  td.innerHTML = `
-  <div class="cell-text-wrapper">
-    <div class="cell-text">${input.value}</div>
-  </div>
-`;
+  td.innerHTML = '<div class="cell-text-wrapper"><div class="cell-text">' + input.value + '</div></div>';
 
   confirmed = true;
 
