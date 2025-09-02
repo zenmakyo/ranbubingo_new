@@ -801,7 +801,7 @@ function toggleCellColor(td) {
    // ------------------------------
 // 保存ボタン処理（確定後にのみ出現）
 // ------------------------------
-function saveBoard() {
+function saveBoard5() {
   const cells = Array.from(document.querySelectorAll("#bingo td"));
   // 中央セルはスキップして保存
   const boardData = cells.map((td, i) => {
@@ -809,15 +809,15 @@ function saveBoard() {
     return td.querySelector(".cell-text")?.textContent.trim() || "";
   });
 
-  localStorage.setItem("bingoBoard", JSON.stringify(boardData));
+  localStorage.setItem("bingoBoard5", JSON.stringify(boardData));
   alert("保存しました！");
 }
 
 // ------------------------------
 // 読込ボタン処理
 // ------------------------------
-function loadBoard() {
-  const saved = localStorage.getItem("bingoBoard");
+function loadBoard5() {
+  const saved = localStorage.getItem("bingoBoard5");
   if (!saved) {
     alert("保存データがありません");
     return;
