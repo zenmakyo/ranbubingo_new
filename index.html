@@ -755,14 +755,26 @@ function loadBoard() {
   const boardData = JSON.parse(saved);
   const cells = Array.from(document.querySelectorAll("#bingo td"));
 
+  // 一旦 usedWords をクリア
+  usedWords.clear();
+
   cells.forEach((td, i) => {
     if (i === 12) return; // 中央フリーはスキップ
 
     const textarea = td.querySelector("textarea");
     if (textarea) {
       textarea.value = ""; // 一旦消去
-      if (boardData[i] !== null) {
-        textarea.value = boardData[i]; // 保存内容を入力
+      const val = boardData[i] || "";
+      textarea.value = val; // 保存内容を入力
+
+      if (val) {
+        // usedWords に追加
+        usedWords.add(val);
+
+        // 背景色設定
+        finalizeInput(textarea, td, val);
+      } else {
+        td.style.background = "#ccc"; // 空なら灰色
       }
     }
   });
