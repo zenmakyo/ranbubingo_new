@@ -868,11 +868,13 @@ function loadBoard() {
     }
   });
 
-  // リーチセルに色付け
-  reachCells.forEach(i => {
-    const overlay = cells[i].querySelector(".cell-overlay");
-    overlay.style.backgroundColor = "rgba(255, 255, 153, 0.9)"; // リーチ色
-  });
+  // リーチセルに赤枠を付ける
+reachCells.forEach(i => {
+  const overlay = cells[i].querySelector(".cell-overlay");
+  overlay.style.backgroundColor = "transparent"; // 背景は透明
+  overlay.style.border = "3px solid red";       // 赤枠
+  overlay.style.boxSizing = "border-box";       // 枠を内側に含める
+});
 
   // ビンゴセルに色付け
   bingoLines.forEach(line => {
