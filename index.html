@@ -682,10 +682,10 @@ if (!document.getElementById("confirm-btn")) {
 
 // 読込ボタン復活
 if (!document.getElementById("load-btn")) {
-  const confirmBtn = document.createElement("button");
-  confirmBtn.id = "load-btn";
-  confirmBtn.textContent = "読込";
-  confirmBtn.onclick = loadBoard;
+  const loadBtn = document.createElement("button");
+  loadBtn.id = "load-btn";
+  loadBtn.textContent = "読込";
+  loadBtn.onclick = loadBoard;
   buttonContainer.appendChild(loadBtn);
 }
 
