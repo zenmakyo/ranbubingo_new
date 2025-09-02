@@ -562,6 +562,14 @@ function confirmBoard() {
   const resetBtn = document.getElementById("reset-btn");
   if (resetBtn) resetBtn.remove();
 
+  // 保存ボタン作成
+if (!document.getElementById("save-btn")) {
+  const saveBtn = document.createElement("button");
+  saveBtn.id = "save-btn";
+  saveBtn.textContent = "保存";
+  saveBtn.addEventListener("click", saveBoard);
+}
+
   // 色リセットボタン作成
 if (!document.getElementById("color-reset-btn")) {
   const colorResetBtn = document.createElement("button");
@@ -675,6 +683,10 @@ if (!document.getElementById("confirm-btn")) {
   // 色リセットボタン削除
   const colorResetBtn = document.getElementById("color-reset-btn");
   if (colorResetBtn) colorResetBtn.remove();
+
+  // 保存ボタン削除
+  const saveBtn = document.getElementById("save-btn");
+  if (saveBtn) saveBtn.remove();
 
   confirmed = false;
 }
