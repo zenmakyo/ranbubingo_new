@@ -520,6 +520,12 @@ function disableCellClick(td) {
 
 // 共通の確定処理
 function confirmBoard() {
+  // 名前入力チェック
+  const nameInput = document.getElementById("player-name");
+  if (nameInput) {
+    alert("名前を入力してください！");
+    return;
+  }
   const cells = Array.from(document.querySelectorAll("#bingo td"));
   const inputs = cells.filter((td, i) => i !== 12)
                       .map(td => td.querySelector("textarea"));
