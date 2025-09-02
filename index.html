@@ -816,6 +816,9 @@ function loadBoard() {
   alert("保存データを読み込みました");
 }
 
+    let lastReachLines = new Set();
+    let lastBingoLines = new Set();
+
     function checkBingo() {
   const cells = Array.from(document.querySelectorAll("#bingo td"));
 
@@ -825,70 +828,76 @@ function loadBoard() {
     [0,6,12,18,24],[4,8,12,16,20] // 斜め
   ];
 
-  // まず全セルリセット
+  // セルの overlay を準備
   cells.forEach(td => {
-  let overlay = td.querySelector(".cell-overlay");
-  if (!overlay) {
-    overlay = document.createElement("div");
-    overlay.className = "cell-overlay";
-    overlay.style.position = "absolute";
-    overlay.style.top = "0";
-    overlay.style.left = "0";
-    overlay.style.width = "100%";
-    overlay.style.height = "100%";
-    overlay.style.pointerEvents = "none";
-    overlay.style.zIndex = "0";
-    td.insertBefore(overlay, td.firstChild);
-  }
-  // クリック済みセルはそのまま色を維持
-  if (td.dataset.clicked === "true") {
-    overlay.style.backgroundColor = "rgba(181, 141, 200, 0.9)"; // 通常クリック色
-  } else {
-    overlay.style.backgroundColor = "";
-  }
-});
+    let overlay = td.querySelector(".cell-overlay");
+    if (!overlay) {
+      overlay = document.createElement("div");
+      overlay.className = "cell-overlay";
+      overlay.style.position = "absolute";
+      overlay.style.top = "0";
+      overlay.style.left = "0";
+      overlay.style.width = "100%";
+      overlay.style.height = "100%";
+      overlay.style.pointerEvents = "none";
+      overlay.style.zIndex = "0";
+      td.insertBefore(overlay, td.firstChild);
+    }
+    // クリック済みセルは色を維持
+    overlay.style.backgroundColor = td.dataset.clicked === "true" ? "rgba(181, 141, 200, 0.9)" : "";
+    overlay.style.border = ""; // 枠リセット
+  });
 
-  let reachCount = 0;
-  let bingoCount = 0;
   let reachCells = [];
   let bingoLines = [];
+  let newReachLines = new Set();
+  let newBingoLines = new Set();
 
+  // リーチ・ビンゴ判定
   lines.forEach(line => {
     const filled = line.filter(i => cells[i].dataset.clicked === "true");
-
     if (filled.length === 5) {
-      bingoCount++;
       bingoLines.push(line);
+      newBingoLines.add(line.toString());
     } else if (filled.length === 4) {
       const remaining = line.find(i => cells[i].dataset.clicked !== "true");
       if (remaining !== undefined) {
-        reachCount++;
         reachCells.push(remaining);
+        newReachLines.add(line.toString());
       }
     }
   });
 
-  // リーチセルに赤枠を付ける
-reachCells.forEach(i => {
-  const overlay = cells[i].querySelector(".cell-overlay");
-  overlay.style.backgroundColor = "transparent"; // 背景は透明
-  overlay.style.border = "3px solid red";       // 赤枠
-  overlay.style.boxSizing = "border-box";       // 枠を内側に含める
-});
+  // リーチセルに赤枠
+  reachCells.forEach(i => {
+    const overlay = cells[i].querySelector(".cell-overlay");
+    overlay.style.backgroundColor = "transparent";
+    overlay.style.border = "3px solid red";
+    overlay.style.boxSizing = "border-box";
+  });
 
-  // ビンゴセルに色付け
+  // ビンゴセルに色
   bingoLines.forEach(line => {
     line.forEach(i => {
       const overlay = cells[i].querySelector(".cell-overlay");
-      overlay.style.backgroundColor = "rgba(255, 0, 0, 0.9)"; // ビンゴ色
+      overlay.style.backgroundColor = "rgba(255, 0, 0, 0.9)";
+      overlay.style.border = ""; // 赤枠は消す
     });
   });
 
-  // メッセージ
+  // アラート出力（前回から変化があった列のみ）
+  const newReachCount = [...newReachLines].filter(s => !lastReachLines.has(s)).length;
+  const newBingoCount = [...newBingoLines].filter(s => !lastBingoLines.has(s)).length;
+
   let message = "";
-  if (reachCount > 0) message += `リーチ ${reachCount}列！\n`;
-  if (bingoCount > 0) message += `ビンゴ ${bingoCount}列！\nおめでとうございます！`;
+  if (newReachCount > 0) message += `リーチ ${newReachCount}列！\n`;
+  if (newBingoCount > 0) message += `ビンゴ ${newBingoCount}列！\nおめでとうございます！`;
+
   if (message) alert(message);
+
+  // 状態を更新
+  lastReachLines = newReachLines;
+  lastBingoLines = newBingoLines;
 }
     
   </script>
