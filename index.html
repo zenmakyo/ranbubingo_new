@@ -532,20 +532,35 @@ function confirmBoard() {
   if (resetBtn) resetBtn.remove();
 
   // 色リセットボタン作成
-  if (!document.getElementById("color-reset-btn")) {
-    const colorResetBtn = document.createElement("button");
-    colorResetBtn.id = "color-reset-btn";
-    colorResetBtn.textContent = "色リセット";
-    colorResetBtn.onclick = () => {
-  const cells = document.querySelectorAll("#bingo td");
-  cells.forEach(td => {
-    const overlay = td.querySelector(".cell-overlay");
-    if (overlay) overlay.style.backgroundColor = "";
-    td.dataset.clicked = "false";
-  });
-};
-    buttonContainer.appendChild(colorResetBtn);
-  }
+if (!document.getElementById("color-reset-btn")) {
+  const colorResetBtn = document.createElement("button");
+  colorResetBtn.id = "color-reset-btn";
+  colorResetBtn.textContent = "色リセット";
+  colorResetBtn.onclick = () => {
+    const cells = document.querySelectorAll("#bingo td");
+    cells.forEach(td => {
+      // まず overlay があるかチェック
+      let overlay = td.querySelector(".cell-overlay");
+      if (!overlay) {
+        // なければ作って文字の下に配置
+        overlay = document.createElement("div");
+        overlay.className = "cell-overlay";
+        overlay.style.position = "absolute";
+        overlay.style.top = "0";
+        overlay.style.left = "0";
+        overlay.style.width = "100%";
+        overlay.style.height = "100%";
+        overlay.style.pointerEvents = "none"; // クリック透過
+        overlay.style.zIndex = "0";           // 文字の下
+        td.insertBefore(overlay, td.firstChild);
+      }
+      // 背景色リセット
+      overlay.style.backgroundColor = "";
+      td.dataset.clicked = "false";
+    });
+  };
+  buttonContainer.appendChild(colorResetBtn);
+}
 
   // 解除ボタン作成
   if (!document.getElementById("undo-btn")) {
@@ -628,28 +643,28 @@ if (confirmBtn) confirmBtn.onclick = confirmBoard;
 
     // セルをクリックで色付け／再クリックで解除
 function toggleCellColor(td) {
-  const overlayColor = "rgba(255, 255, 153, 0.6)"; // セル内オーバーレイ色
+  const overlayColor = "rgba(255, 255, 153, 0.6)";
+  let overlay = td.querySelector(".cell-overlay");
 
-  if (!td.dataset.clicked || td.dataset.clicked === "false") {
-    // オーバーレイ用の div を作る
-    let overlay = td.querySelector(".cell-overlay");
-    if (!overlay) {
-      overlay = document.createElement("div");
-      overlay.className = "cell-overlay";
-      overlay.style.position = "absolute";
-      overlay.style.top = "0";
-      overlay.style.left = "0";
-      overlay.style.width = "100%";
-      overlay.style.height = "100%";
-      overlay.style.pointerEvents = "none"; // クリック透過
-      td.insertBefore(overlay, td.firstChild);
-    }
+  if (!overlay) {
+    overlay = document.createElement("div");
+    overlay.className = "cell-overlay";
+    overlay.style.position = "absolute";
+    overlay.style.top = "0";
+    overlay.style.left = "0";
+    overlay.style.width = "100%";
+    overlay.style.height = "100%";
+    overlay.style.pointerEvents = "none";
+    overlay.style.zIndex = "0";       // 背面に固定
+    td.insertBefore(overlay, td.firstChild); // 文字より下に
+  }
+
+  if (td.dataset.clicked === "true") {
+    overlay.style.backgroundColor = "";
+    td.dataset.clicked = "false";
+  } else {
     overlay.style.backgroundColor = overlayColor;
     td.dataset.clicked = "true";
-  } else {
-    const overlay = td.querySelector(".cell-overlay");
-    if (overlay) overlay.style.backgroundColor = "";
-    td.dataset.clicked = "false";
   }
 }
     
