@@ -110,7 +110,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 2.5vmin;
+      font-size: 3vmin;
       text-align: center;
       word-break: break-word;
       overflow-wrap: break-word;
@@ -744,8 +744,21 @@ window.addEventListener("load", () => {
 
     if (savedConfirmed) {
       td.innerHTML = '<div class="cell-text-wrapper"><div class="cell-text">' + data.text + '</div></div>';
-      if (data.clicked === "true") toggleCellColor(td);
-      enableCellClick(td);
+
+      // 背景色を再判定
+      const textWrapper = td.querySelector(".cell-text-wrapper");
+      if (rainbowWords.includes(data.text)) {
+        textWrapper.style.background = "linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet)";
+      } else if (roseWord.includes(data.text)) {
+        textWrapper.style.background = "pink";
+      } else if (mixWords.includes(data.text)) {
+        textWrapper.style.background = "lightgoldenrodyellow";
+      } else {
+        textWrapper.style.background = "lightgray";
+      }
+
+      if (data.clicked === "true") enableCellClick(td);
+      else disableCellClick(td);
     } else {
       td.innerHTML = `
         <div class="cell-content">
@@ -778,8 +791,8 @@ window.addEventListener("load", () => {
       colorResetBtn.onclick = () => {
         const cells = document.querySelectorAll("#bingo td");
         cells.forEach(td => {
-          const overlay = td.querySelector(".cell-overlay");
-          if (overlay) overlay.style.backgroundColor = "";
+          const textWrapper = td.querySelector(".cell-text-wrapper");
+          if (textWrapper) textWrapper.style.background = "";
           td.dataset.clicked = "false";
         });
       };
