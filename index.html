@@ -157,6 +157,7 @@
   <button id="random-btn" onclick="randomFill()">ランダム配置</button>
   <button id="reset-btn" onclick="resetBoard()">リセット</button>
   <button id="confirm-btn">確定</button>
+  <button id="load-btn">読込</button>
   </div>
 
   <script>
@@ -560,6 +561,10 @@ function confirmBoard() {
   const resetBtn = document.getElementById("reset-btn");
   if (resetBtn) resetBtn.remove();
 
+  // 読込ボタン削除
+const loadBtn = document.getElementById("load-btn");
+if (loadBtn) loadBtn.style.display = "none";
+
   // 保存ボタン作成
 if (!document.getElementById("save-btn")) {
   const saveBtn = document.createElement("button");
@@ -673,6 +678,15 @@ if (!document.getElementById("confirm-btn")) {
   confirmBtn.textContent = "確定";
   confirmBtn.onclick = confirmBoard;
   buttonContainer.appendChild(confirmBtn);
+}
+
+// 読込ボタン復活
+if (!document.getElementById("load-btn")) {
+  const confirmBtn = document.createElement("button");
+  confirmBtn.id = "load-btn";
+  confirmBtn.textContent = "読込";
+  confirmBtn.onclick = confirmBoard;
+  buttonContainer.appendChild(loadBtn);
 }
 
   // 解除ボタン削除
