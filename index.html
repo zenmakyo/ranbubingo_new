@@ -727,50 +727,48 @@ function toggleCellColor(td) {
   }
 }
 
-    // ------------------------------
-// 保存ボタン処理
+   // ------------------------------
+// 保存ボタン処理（確定後にのみ出現）
 // ------------------------------
-document.getElementById("save-btn").addEventListener("click", saveBoard);
-
 function saveBoard() {
   const cells = Array.from(document.querySelectorAll("#bingo td"));
-  const boardData = cells.map(td => {
-    const text = td.querySelector("textarea")?.value || td.textContent.trim();
-    return { text };
+  // 中央セルはスキップして保存
+  const boardData = cells.map((td, i) => {
+    if (i === 12) return null; // 中央フリー
+    return td.querySelector(".cell-text")?.textContent.trim() || "";
   });
 
-  localStorage.setItem("bingoBoard", JSON.stringify({ boardData }));
+  localStorage.setItem("bingoBoard", JSON.stringify(boardData));
   alert("保存しました！");
 }
 
 // ------------------------------
-// ページロード時の復元
+// 読込ボタン処理
 // ------------------------------
-window.addEventListener("load", () => {
+function loadBoard() {
+  const saved = localStorage.getItem("bingoBoard");
+  if (!saved) {
+    alert("保存データがありません");
+    return;
+  }
+
+  const boardData = JSON.parse(saved);
   const cells = Array.from(document.querySelectorAll("#bingo td"));
 
-  // 初期状態（確定前）を描画
   cells.forEach((td, i) => {
     if (i === 12) return; // 中央フリーはスキップ
-    td.innerHTML = `
-      <div class="cell-content">
-        <textarea class="cell-input" rows="1" wrap="soft"></textarea>
-      </div>
-    `;
-  });
 
-  // 保存情報があれば復元（テキストボックスに自動入力）
-  const saved = localStorage.getItem("bingoBoard");
-  if (!saved) return;
-
-  const { boardData } = JSON.parse(saved);
-  boardData.forEach((data, i) => {
-    if (i === 12) return;
-    const td = cells[i];
     const textarea = td.querySelector("textarea");
-    if (textarea) textarea.value = data.text;
+    if (textarea) {
+      textarea.value = ""; // 一旦消去
+      if (boardData[i] !== null) {
+        textarea.value = boardData[i]; // 保存内容を入力
+      }
+    }
   });
-});
+
+  alert("保存データを読み込みました");
+}
     
   </script>
 </body>
