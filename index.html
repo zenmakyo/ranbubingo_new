@@ -91,6 +91,15 @@
     .suggestions div:hover {
       background-color: #eee;
     }
+    .cell-text {
+      font-size: 2.5vmin;      /* 入力と同じスケール */
+      text-align: center;
+      word-break: break-word;  /* 長い単語も折り返し */
+      overflow-wrap: break-word;
+      white-space: pre-wrap;   /* 改行を保持して折り返し */
+      max-width: 90%;
+      max-height: 90%;
+    }
     .button-container {
       margin: 1rem auto;
       display: flex;
@@ -485,8 +494,8 @@ function confirmBoard() {
 
   // セルをテキスト表示に変更
   inputs.forEach(input => {
-    const td = input.closest("td");
-    td.innerHTML = `<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;">${input.value}</div>`;
+  const td = input.closest("td");
+  td.innerHTML = `<div class="cell-text">${input.value}</div>`;
   });
 
   confirmed = true;
