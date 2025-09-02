@@ -594,14 +594,12 @@ textCells.forEach(td => {
 // 確定解除処理
 function undoConfirm() {
   const cells = Array.from(document.querySelectorAll("#bingo td"));
-  // ① 既存のオーバーレイを全て削除＆クリック状態リセット
-  cells.forEach(td => {
-    const overlay = td.querySelector(".cell-overlay");
-    if (overlay) overlay.remove();
-    td.dataset.clicked = "false";
+  // 全セル（中央以外）を未クリック状態に戻す
+  cells.forEach((td, i) => {
+    if (i !== 12) td.dataset.clicked = "false";
   });
 
-  // ② セル内をテキストボックスに戻す
+  // セル内をテキストボックスに戻す
   cells.forEach((td, i) => {
     if (i !== 12) {
       const value = td.textContent.trim();
