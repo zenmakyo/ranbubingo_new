@@ -511,16 +511,19 @@ function confirmBoard() {
 
   alert("マスを確定します！\n解除ボタンで再配置できます");
 
-  // セルをテキスト表示に変更
-  inputs.forEach(input => {
-  const td = input.closest("td");
+    // まず全セルのオーバーレイ削除＋クリック状態リセット
+  cells.forEach((td, i) => {
+    if (i !== 12) { // 中央は対象外
+      const overlay = td.querySelector(".cell-overlay");
+      if (overlay) overlay.remove();
+      td.dataset.clicked = "false";
+    }
+  });
 
-  // 既存のオーバーレイがあれば削除
-  const overlay = td.querySelector(".cell-overlay");
-  if (overlay) overlay.remove();
-  td.dataset.clicked = "false"; // クリック状態リセット
-    
-  td.innerHTML = '<div class="cell-text-wrapper"><div class="cell-text">' + input.value + '</div></div>';
+  // その後、セルをテキスト表示に変更
+  inputs.forEach(input => {
+    const td = input.closest("td");
+    td.innerHTML = '<div class="cell-text-wrapper"><div class="cell-text">' + input.value + '</div></div>';
   });
 
   confirmed = true;
