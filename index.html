@@ -721,39 +721,48 @@ function toggleCellColor(td) {
   }
 }
 
-    // 保存ボタン処理
+    // ------------------------------
+// 保存ボタン処理
+// ------------------------------
 document.getElementById("save-btn").addEventListener("click", saveBoard);
 
 function saveBoard() {
   const cells = Array.from(document.querySelectorAll("#bingo td"));
   const boardData = cells.map(td => {
-    // textareaがあればその値を取得、無ければテキスト化されている値を取得
     const text = td.querySelector("textarea")?.value || td.textContent.trim();
     return { text };
   });
 
   localStorage.setItem("bingoBoard", JSON.stringify({ boardData }));
-
   alert("保存しました！");
 }
 
-// ページ読み込み時の復元
+// ------------------------------
+// ページロード時の復元
+// ------------------------------
 window.addEventListener("load", () => {
+  const cells = Array.from(document.querySelectorAll("#bingo td"));
+
+  // 初期状態（確定前）を描画
+  cells.forEach((td, i) => {
+    if (i === 12) return; // 中央フリーはスキップ
+    td.innerHTML = `
+      <div class="cell-content">
+        <textarea class="cell-input" rows="1" wrap="soft"></textarea>
+      </div>
+    `;
+  });
+
+  // 保存情報があれば復元（テキストボックスに自動入力）
   const saved = localStorage.getItem("bingoBoard");
   if (!saved) return;
 
   const { boardData } = JSON.parse(saved);
-  const cells = Array.from(document.querySelectorAll("#bingo td"));
-
   boardData.forEach((data, i) => {
+    if (i === 12) return;
     const td = cells[i];
-    if (i === 12) return; // 中央フリーはスキップ
-
-    // 確定前の状態（空のテキストボックス）にテキストを入力
     const textarea = td.querySelector("textarea");
-    if (textarea) {
-      textarea.value = data.text;
-    }
+    if (textarea) textarea.value = data.text;
   });
 });
     
