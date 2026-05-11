@@ -454,21 +454,67 @@ input.addEventListener("blur", () => {
       }
     }
 
-function showAllSuggestions(suggestionBox) {
-  const currentUsed = Array.from(document.querySelectorAll("textarea")).map(i => i.value.trim());
+function showAllSuggestions(suggestionBox, input, td) {
+
+  const currentUsed = Array.from(document.querySelectorAll(".cell-input"))
+    .map(i => i.value.trim());
+
   suggestionBox.innerHTML = "";
-  wordList.forEach(word => {
-    if (!currentUsed.includes(word)) {
+
+  // 検索ボックス
+  const search = document.createElement("input");
+  search.type = "text";
+  search.placeholder = "検索...";
+  search.style.width = "95%";
+  search.style.margin = "4px";
+
+  suggestionBox.appendChild(search);
+
+  const listContainer = document.createElement("div");
+  suggestionBox.appendChild(listContainer);
+
+  function renderList(filter="") {
+
+    listContainer.innerHTML = "";
+
+    wordList.forEach(word => {
+
+      if (currentUsed.includes(word)) return;
+
+      if (!word.includes(filter)) return;
+
       const div = document.createElement("div");
       div.textContent = word;
-      suggestionBox.appendChild(div);
-    }
+
+      div.onclick = () => {
+
+        input.value = word;
+
+        const button = td.querySelector(".cell-button");
+        if (button) button.textContent = word;
+
+        finalizeInput(input, td, word);
+
+        suggestionBox.style.display = "none";
+      };
+
+      listContainer.appendChild(div);
+
+    });
+
+  }
+
+  search.addEventListener("input", () => {
+    renderList(search.value);
   });
+
+  renderList();
+
   suggestionBox.style.display = "block";
 }
     
     function randomFill() {
-  const inputs = Array.from(document.querySelectorAll("textarea"));
+  const inputs = Array.from(document.querySelectorAll(".cell-input"));
 
   // 入力済みセルのカウント
   const filledInputs = inputs.filter(input => input.value.trim());
@@ -500,6 +546,8 @@ function showAllSuggestions(suggestionBox) {
     const val = selectedWords[idx++];
     if (!val) return;
     input.value = val;
+    const button = input.closest("td").querySelector(".cell-button");
+    if (button) button.textContent = val;
     const td = input.closest("td");
     finalizeInput(input, td, val);
   });
@@ -507,9 +555,11 @@ function showAllSuggestions(suggestionBox) {
 
 
     function resetBoard() {
-      const inputs = document.querySelectorAll("textarea");
+      const inputs = document.querySelectorAll(".cell-input");
       inputs.forEach(input => {
         input.value = "";
+        const button = input.closest("td").querySelector(".cell-button");
+        if (button) button.textContent = "選択";
         input.closest("td").style.background = "#ccc";
       });
       usedWords.clear();
@@ -543,7 +593,7 @@ function confirmBoard() {
   const nameInput = document.getElementById("player-name");
   const cells = Array.from(document.querySelectorAll("#bingo td"));
   const inputs = cells.filter((td, i) => i !== 12)
-                      .map(td => td.querySelector("textarea"));
+                      .map(td => td.querySelector(".cell-input"));
 
   let alertMessage = "";
 
@@ -720,7 +770,9 @@ function undoConfirm() {
       const value = td.textContent.trim();
       td.innerHTML = `
         <div class="cell-content">
-          <textarea class="cell-input" rows="1" wrap="soft">${value}</textarea>
+          <button class="cell-button">${value || "未選択"}</button>
+          <textarea class="cell-input" hidden>${value}</textarea>
+          <div class="suggestions"></div>
         </div>
       `;
     }
@@ -832,11 +884,13 @@ function loadBoard5() {
   cells.forEach((td, i) => {
     if (i === 12) return; // 中央フリーはスキップ
 
-    const textarea = td.querySelector("textarea");
+    const textarea = td.querySelector(".cell-input");
     if (textarea) {
       textarea.value = ""; // 一旦消去
       const val = boardData[i] || "";
       textarea.value = val; // 保存内容を入力
+      const button = td.querySelector(".cell-button");
+      if (button) button.textContent = val || "選択";
 
       if (val) {
         // usedWords に追加
