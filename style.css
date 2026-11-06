@@ -4,6 +4,7 @@ body {
   font-family: sans-serif;
   text-align: center;
 }
+
 h1 {
   font-family: 'Zen Kurenaido', sans-serif;
   font-size: 3.5rem;
@@ -16,6 +17,7 @@ h1 {
   margin-top: 0.3rem;
   margin-bottom: 0.3rem;
 }
+
 table {
   width: 90vmin;
   height: 90vmin;
@@ -23,6 +25,7 @@ table {
   border-collapse: collapse;
   table-layout: fixed;
 }
+
 td {
   border: 2px solid #2e4e1e;
   aspect-ratio: 1 / 1;
@@ -38,6 +41,7 @@ td {
   background-repeat: no-repeat;
   background-color: #f5f5dc;
 }
+
 .cell-content {
   width: 100%;
   height: 100%;
@@ -47,6 +51,7 @@ td {
   padding: 5%;
   box-sizing: border-box;
 }
+
 .cell-input {
   width: 85%;
   height: 85%;
@@ -58,13 +63,13 @@ td {
   align-items: center;
   justify-content: center;
   
-  /* ↓↓ テキストエリア用のスタイル調整 ↓↓ */
   resize: none;
   overflow-wrap: break-word;
   word-break: break-word;
   overflow: hidden;
   white-space: pre-wrap;
 }
+
 .suggestions {
   position: absolute;
   top: 90%;
@@ -80,13 +85,16 @@ td {
   display: none;
   font-size: 2vmin;
 }
+
 .suggestions div {
   padding: 0.5rem;
   cursor: pointer;
 }
+
 .suggestions div:hover {
   background-color: #eee;
 }
+
 .cell-text-wrapper {
   width: 100%;
   height: 100%;
@@ -96,6 +104,7 @@ td {
   position: relative;
   z-index: 1;
 }
+
 .cell-text {
   max-width: 90%;
   max-height: 90%;
@@ -111,6 +120,7 @@ td {
   position: relative;
   z-index: 2;
 }
+
 .button-container {
   margin: 1rem auto;
   display: flex;
@@ -118,6 +128,7 @@ td {
   gap: 10px;
   width: max-content;
 }
+
 button {
   padding: 0.6rem 1.2rem;
   font-size: 1rem;
