@@ -2,7 +2,92 @@ document.addEventListener("DOMContentLoaded", () => {
   const container = document.getElementById("name-container");
   const usedWords = new Set();
   const table = document.querySelector("#bingo tbody");
+  let activeTargetCell = null; // 現在選択中のセル
 
+  // モーダル要素の動的生成
+  const modalOverlay = document.createElement("div");
+  modalOverlay.className = "modal-overlay";
+  modalOverlay.style.display = "none";
+  modalOverlay.innerHTML = `
+    <div class="modal-content">
+      <h3 style="margin:0; font-size:1.2rem;">幻獣を選択</h3>
+      <input type="text" class="modal-search" placeholder="検索キーワードを入力...">
+      <div class="modal-list"></div>
+      <button class="modal-close-btn">キャンセル</button>
+    </div>
+  `;
+  document.body.appendChild(modalOverlay);
+
+  const modalSearch = modalOverlay.querySelector(".modal-search");
+  const modalList = modalOverlay.querySelector(".modal-list");
+  const modalCloseBtn = modalOverlay.querySelector(".modal-close-btn");
+
+  // モーダルの閉じる処理
+  function closeModal() {
+    modalOverlay.style.display = "none";
+    activeTargetCell = null;
+  }
+  modalCloseBtn.addEventListener("click", closeModal);
+  modalOverlay.addEventListener("click", (e) => {
+    if (e.target === modalOverlay) closeModal();
+  });
+
+  // 検索入力時のリアルタイム絞り込み
+  modalSearch.addEventListener("input", () => {
+    renderModalList(modalSearch.value.trim());
+  });
+
+  // モーダル内リストの描画処理
+  function renderModalList(filterKeyword = "") {
+    modalList.innerHTML = "";
+    
+    // 現在選択中のセルの値（再選択時にリストに復元するため）
+    const currentVal = activeTargetCell ? activeTargetCell.dataset.value || "" : "";
+
+    // 未選択の単語（または自身が選択中の単語）を抽出
+    const availableWords = wordList.filter(word => {
+      const isNotUsed = !usedWords.has(word) || word === currentVal;
+      const matchesSearch = word.includes(filterKeyword);
+      return isNotUsed && matchesSearch;
+    });
+
+    if (availableWords.length === 0) {
+      modalList.innerHTML = `<div style="padding:1rem; color:#888; text-align:center;">該当する幻獣がありません</div>`;
+      return;
+    }
+
+    availableWords.forEach(word => {
+      const item = document.createElement("div");
+      item.className = "modal-item";
+      item.textContent = word;
+      item.addEventListener("click", () => {
+        selectWordForCell(activeTargetCell, word);
+        closeModal();
+      });
+      modalList.appendChild(item);
+    });
+  }
+
+  // セルへの単語適用と配色処理
+  function selectWordForCell(td, word) {
+    const oldVal = td.dataset.value;
+    if (oldVal) usedWords.delete(oldVal);
+
+    if (word) {
+      td.dataset.value = word;
+      usedWords.add(word);
+      const btn = td.querySelector(".cell-select-btn");
+      if (btn) btn.textContent = word;
+      finalizeInput(td, word);
+    } else {
+      delete td.dataset.value;
+      const btn = td.querySelector(".cell-select-btn");
+      if (btn) btn.textContent = "未選択";
+      td.style.background = "#ccc";
+    }
+  }
+
+  // 5x5 テーブルの生成
   for (let row = 0; row < 5; row++) {
     const tr = document.createElement("tr");
     for (let col = 0; col < 5; col++) {
@@ -16,159 +101,26 @@ document.addEventListener("DOMContentLoaded", () => {
         const wrapper = document.createElement("div");
         wrapper.className = "cell-content";
 
-        const input = document.createElement("textarea");
-        input.className = "cell-input";
-        input.setAttribute("placeholder", "未選択");
-        input.setAttribute("rows", "1");
-        input.setAttribute("wrap", "soft");
-        input.addEventListener("keydown", e => {
-          if (e.key === "Enter") e.preventDefault();
+        const btn = document.createElement("button");
+        btn.className = "cell-select-btn";
+        btn.textContent = "未選択";
+        btn.addEventListener("click", () => {
+          activeTargetCell = td;
+          modalSearch.value = "";
+          renderModalList();
+          modalOverlay.style.display = "flex";
+          modalSearch.focus();
         });
 
-        const suggestionBox = document.createElement("div");
-        suggestionBox.className = "suggestions";
-
-        input.addEventListener("input", () => {
-          updateSuggestions(input, suggestionBox);
-          suggestionBox.style.display = "block";
-        });
-        
-        input.addEventListener("focus", () => {
-          updateSuggestions(input, suggestionBox);
-          suggestionBox.style.display = "block";
-        });
-
-        let suggestionLocked = false;
-
-        input.addEventListener("compositionend", () => {
-          suggestionLocked = false;
-          updateSuggestions(input, suggestionBox);
-        });
-
-        input.addEventListener("keydown", (e) => {
-          if (e.key === "Enter") {
-            e.preventDefault();
-            const val = input.value.trim();
-            const td = input.closest("td");
-
-            const currentUsed = Array.from(document.querySelectorAll("textarea")).map(i => i.value.trim());
-            const matches = wordList.filter(word => !currentUsed.includes(word) && word.includes(val));
-
-            if (!suggestionLocked) {
-              updateSuggestions(input, suggestionBox);
-              suggestionBox.style.display = "block";
-              suggestionLocked = true;
-              return;
-            }
-
-            if (matches.length === 1) {
-              input.value = matches[0];
-              suggestionBox.style.display = "none";
-              finalizeInput(input, td, matches[0]);
-              suggestionLocked = false;
-            } else if (matches.length > 1) {
-              alert("リストから選んでください");
-              setTimeout(() => {
-                updateSuggestions(input, suggestionBox, true);
-                suggestionBox.style.display = "block";
-                input.focus();
-              }, 0);
-            } else {
-              alert("別の幻獣を探してください");
-              input.value = "";
-              td.style.background = "#ccc";
-              suggestionBox.style.display = "none";
-              suggestionLocked = false;
-            }
-          }
-        });
-        
-        input.addEventListener("blur", () => {
-          setTimeout(() => suggestionBox.style.display = "none", 200);
-        });
-
-        suggestionBox.addEventListener("mousedown", (e) => {
-          if (e.target.tagName === "DIV") {
-            const selected = e.target.textContent;
-            if (usedWords.has(selected)) {
-              alert("その幻獣は選択済みです！");
-              return;
-            }
-            input.value = selected;
-            suggestionBox.style.display = "none";
-            finalizeInput(input, td, selected);
-          }
-        });
-
-        input.addEventListener("change", () => {
-          const val = input.value.trim();
-          if (usedWords.has(val)) {
-            alert("その幻獣は選択済みです！");
-            input.value = "";
-            td.style.background = "#ccc";
-            return;
-          }
-          if (!wordList.includes(val)) {
-            alert("乱舞の儀に出現しません！");
-            input.value = "";
-            td.style.background = "#ccc";
-            return;
-          }
-          finalizeInput(input, td, val);
-        });
-
-        wrapper.appendChild(input);
-        wrapper.appendChild(suggestionBox);
+        wrapper.appendChild(btn);
         td.appendChild(wrapper);
       }
-
       tr.appendChild(td);
     }
     table.appendChild(tr);
   }
 
-  function updateSuggestions(input, suggestionBox, forceDisplay = false) {
-    const val = input.value.trim();
-    const currentUsed = Array.from(document.querySelectorAll("textarea")).map(i => i.value.trim());
-    const matches = wordList.filter(word => !currentUsed.includes(word) && word.includes(val));
-
-    suggestionBox.innerHTML = "";
-
-    if (forceDisplay || val === "") {
-      wordList.forEach(word => {
-        if (!currentUsed.includes(word)) {
-          const item = document.createElement("div");
-          item.className = "suggestion-item";
-          item.textContent = word;
-          item.addEventListener("click", () => {
-            input.value = word;
-            suggestionBox.style.display = "none";
-            finalizeInput(input, input.closest("td"), word);
-            suggestionLocked = false;
-          });
-          suggestionBox.appendChild(item);
-        }
-      });
-    } else {
-      matches.forEach(word => {
-        const item = document.createElement("div");
-        item.className = "suggestion-item";
-        item.textContent = word;
-        item.addEventListener("click", () => {
-          input.value = word;
-          suggestionBox.style.display = "none";
-          finalizeInput(input, input.closest("td"), word);
-          suggestionLocked = false;
-        });
-        suggestionBox.appendChild(item);
-      });
-    }
-
-    suggestionBox.style.display = suggestionBox.children.length > 0 ? "block" : "none";
-  }
-
-  function finalizeInput(input, td, val) {
-    usedWords.add(val);
+  function finalizeInput(td, val) {
     if (rainbowWords.includes(val)) {
       td.style.background = "linear-gradient(135deg, #f4d7f4, #d6c6e1, #c0d4f7, #bde5c8, #fffabf, #ffe4b5, #f7b3b3)";
     } else if (roseWord.includes(val)) {
@@ -177,15 +129,8 @@ document.addEventListener("DOMContentLoaded", () => {
       td.style.background = `
         linear-gradient(
           120deg,
-          #f4d7f4 0%,
-          #d6c6e1 9%,
-          #c0d4f7 18%,
-          #bde5c8 27%,
-          #fffabf 36%,
-          #ffe4b5 45%,
-          #f7b3b3 54%,
-          #ccc 63%,
-          #ccc 100%
+          #f4d7f4 0%, #d6c6e1 9%, #c0d4f7 18%, #bde5c8 27%,
+          #fffabf 36%, #ffe4b5 45%, #f7b3b3 54%, #ccc 63%, #ccc 100%
         )
       `;
     } else {
@@ -194,47 +139,44 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function randomFill() {
-    const inputs = Array.from(document.querySelectorAll("textarea"));
-    const filledInputs = inputs.filter(input => input.value.trim());
-    const allFilled = filledInputs.length === inputs.length;
+    const cells = Array.from(document.querySelectorAll("#bingo td")).filter((_, i) => i !== 12);
+    const filledCells = cells.filter(td => td.dataset.value);
 
-    if (allFilled) {
+    if (filledCells.length === cells.length) {
       resetBoard();
     }
 
-    const updatedInputs = Array.from(document.querySelectorAll("textarea"));
-    const emptyInputs = updatedInputs.filter(input => !input.value.trim());
+    const currentCells = Array.from(document.querySelectorAll("#bingo td")).filter((_, i) => i !== 12);
+    const emptyCells = currentCells.filter(td => !td.dataset.value);
 
-    const currentUsed = new Set(updatedInputs.map(input => input.value.trim()).filter(Boolean));
-    const availableRainbow = rainbowWords.filter(w => !currentUsed.has(w));
-    const availableNormal = wordList.filter(w => !currentUsed.has(w) && !rainbowWords.includes(w));
+    const availableRainbow = rainbowWords.filter(w => !usedWords.has(w));
+    const availableNormal = wordList.filter(w => !usedWords.has(w) && !rainbowWords.includes(w));
 
     const rainbowCount = Math.min(8, Math.max(3, Math.floor(Math.random() * 9)));
     const selectedRainbow = availableRainbow.sort(() => Math.random() - 0.5).slice(0, rainbowCount);
-    const remainingCount = emptyInputs.length - selectedRainbow.length;
+    const remainingCount = emptyCells.length - selectedRainbow.length;
     const selectedNormal = availableNormal.sort(() => Math.random() - 0.5).slice(0, remainingCount);
 
     const selectedWords = [...selectedRainbow, ...selectedNormal].sort(() => Math.random() - 0.5);
 
     let idx = 0;
-    emptyInputs.forEach(input => {
+    emptyCells.forEach(td => {
       const val = selectedWords[idx++];
-      if (!val) return;
-      input.value = val;
-      const td = input.closest("td");
-      finalizeInput(input, td, val);
+      if (val) selectWordForCell(td, val);
     });
   }
 
   function resetBoard() {
-    const inputs = document.querySelectorAll("textarea");
-    inputs.forEach(input => {
-      input.value = "";
-      input.closest("td").style.background = "#ccc";
+    const cells = Array.from(document.querySelectorAll("#bingo td")).filter((_, i) => i !== 12);
+    cells.forEach(td => {
+      delete td.dataset.value;
+      const btn = td.querySelector(".cell-select-btn");
+      if (btn) btn.textContent = "未選択";
+      td.style.background = "#ccc";
     });
     usedWords.clear();
   }
-    
+
   const buttonContainer = document.querySelector(".button-container");
   const cellClickHandlers = new Map();
 
@@ -258,7 +200,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function confirmBoard() {
     const nameInput = document.getElementById("player-name");
     const cells = Array.from(document.querySelectorAll("#bingo td"));
-    const inputs = cells.filter((td, i) => i !== 12).map(td => td.querySelector("textarea"));
+    const normalCells = cells.filter((_, i) => i !== 12);
 
     let alertMessage = "";
 
@@ -266,7 +208,7 @@ document.addEventListener("DOMContentLoaded", () => {
       alertMessage += "名前を入力してください！\n";
     }
 
-    const emptyCell = inputs.some(input => !input || input.value.trim() === "");
+    const emptyCell = normalCells.some(td => !td.dataset.value);
     if (emptyCell) {
       alertMessage += "マスを全て埋めてください！";
     }
@@ -277,8 +219,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     alert("マスを確定します！\n解除ボタンで再配置できます！");
-    
-    // 確定時に名前をテキスト化
+
     const name = nameInput.value.trim();
     container.innerHTML = `
       <div style="
@@ -301,12 +242,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const overlay = td.querySelector(".cell-overlay");
         if (overlay) overlay.remove();
         td.dataset.clicked = "false";
-      }
-    });
 
-    inputs.forEach(input => {
-      const td = input.closest("td");
-      td.innerHTML = '<div class="cell-text-wrapper"><div class="cell-text">' + input.value + '</div></div>';
+        // ボタンからテキスト表示へ置き換え
+        const val = td.dataset.value || "";
+        td.innerHTML = `<div class="cell-text-wrapper"><div class="cell-text">${val}</div></div>`;
+      }
     });
 
     const centerCell = document.querySelector("#bingo td[data-row='2'][data-col='2']");
@@ -326,16 +266,11 @@ document.addEventListener("DOMContentLoaded", () => {
       centerCell.insertBefore(overlay, centerCell.firstChild);
     }
 
-    const randomBtn = document.getElementById("random-btn");
-    if (randomBtn) randomBtn.remove();
-    const confirmBtn = document.getElementById("confirm-btn");
-    if (confirmBtn) confirmBtn.remove();
-    const resetBtn = document.getElementById("reset-btn");
-    if (resetBtn) resetBtn.remove();
-    const loadBtn = document.getElementById("load-btn");
-    if (loadBtn) loadBtn.remove();
+    document.getElementById("random-btn")?.remove();
+    document.getElementById("confirm-btn")?.remove();
+    document.getElementById("reset-btn")?.remove();
+    document.getElementById("load-btn")?.remove();
 
-    // 保存ボタンの作成
     if (!document.getElementById("save-btn")) {
       const saveBtn = document.createElement("button");
       saveBtn.id = "save-btn";
@@ -403,7 +338,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function undoConfirm() {
-    // 解除時に名前を入力欄に戻す
     const currentNameDiv = container.querySelector("div");
     const currentName = currentNameDiv ? currentNameDiv.textContent.trim() : "";
     
@@ -427,18 +361,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
     cells.forEach((td, i) => {
       if (i !== 12) {
-        const value = td.textContent.trim();
+        const value = td.dataset.value || "";
         td.innerHTML = `
           <div class="cell-content">
-            <textarea class="cell-input" rows="1" wrap="soft">${value}</textarea>
+            <button class="cell-select-btn">${value || "未選択"}</button>
           </div>
         `;
+        const btn = td.querySelector(".cell-select-btn");
+        btn.addEventListener("click", () => {
+          activeTargetCell = td;
+          modalSearch.value = "";
+          renderModalList();
+          modalOverlay.style.display = "flex";
+          modalSearch.focus();
+        });
       }
     });
 
     ["undo-btn", "color-reset-btn", "save-btn"].forEach(id => {
-      const btn = document.getElementById(id);
-      if (btn) btn.remove();
+      document.getElementById(id)?.remove();
     });
 
     if (!document.getElementById("random-btn")) {
@@ -498,7 +439,6 @@ document.addEventListener("DOMContentLoaded", () => {
     checkBingo();
   }
 
-  // 保存処理（名前とマスデータ両方を保存）
   function saveBoard5() {
     const currentNameDiv = container.querySelector("div");
     const name = currentNameDiv ? currentNameDiv.textContent.trim() : "";
@@ -506,7 +446,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const cells = Array.from(document.querySelectorAll("#bingo td"));
     const boardData = cells.map((td, i) => {
       if (i === 12) return null;
-      return td.querySelector(".cell-text")?.textContent.trim() || "";
+      return td.dataset.value || "";
     });
 
     const saveData = {
@@ -518,7 +458,6 @@ document.addEventListener("DOMContentLoaded", () => {
     alert("保存しました！");
   }
 
-  // 読込処理（保存された名前とマスデータを読み込み）
   function loadBoard5() {
     const saved = localStorage.getItem("bingoBoard5");
     if (!saved) {
@@ -527,7 +466,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const parsedData = JSON.parse(saved);
-    // 旧データ（配列形式）と新データ（オブジェクト形式）の両方に対応
     const boardData = Array.isArray(parsedData) ? parsedData : parsedData.board;
     const savedName = !Array.isArray(parsedData) && parsedData.name ? parsedData.name : "";
 
@@ -541,20 +479,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     cells.forEach((td, i) => {
       if (i === 12) return;
-
-      const textarea = td.querySelector("textarea");
-      if (textarea) {
-        textarea.value = "";
-        const val = boardData[i] || "";
-        textarea.value = val;
-
-        if (val) {
-          usedWords.add(val);
-          finalizeInput(textarea, td, val);
-        } else {
-          td.style.background = "#ccc";
-        }
-      }
+      const val = boardData[i] || "";
+      selectWordForCell(td, val);
     });
 
     alert("保存データを読み込みました");
@@ -645,7 +571,6 @@ document.addEventListener("DOMContentLoaded", () => {
     prevBingoCount = bingoCount;
   }
 
-  // ボタンイベントのバインド
   document.getElementById("random-btn")?.addEventListener("click", randomFill);
   document.getElementById("reset-btn")?.addEventListener("click", resetBoard);
   document.getElementById("confirm-btn")?.addEventListener("click", confirmBoard);
