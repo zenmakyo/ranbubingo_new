@@ -252,5 +252,316 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function resetBoard() {
-    const inputs = document.querySelectorAll
+    const inputs = document.querySelectorAll("textarea");
+    inputs.forEach(input => {
+      input.value = "";
+      input.closest("td").style.background = "#ccc";
+    });
+    usedWords.clear();
   }
+    
+  const buttonContainer = document.querySelector(".button-container");
+  const cellClickHandlers = new Map();
+
+  function enableCellClick(td) {
+    if (cellClickHandlers.has(td)) return;
+    const handler = () => toggleCellColor(td);
+    td.addEventListener("click", handler);
+    cellClickHandlers.set(td, handler);
+    td.style.cursor = "pointer";
+  }
+
+  function disableCellClick(td) {
+    const handler = cellClickHandlers.get(td);
+    if (handler) {
+      td.removeEventListener("click", handler);
+      cellClickHandlers.delete(td);
+    }
+    td.style.cursor = "default";
+  }
+
+  function confirmBoard() {
+    const nameInput = document.getElementById("player-name");
+    const cells = Array.from(document.querySelectorAll("#bingo td"));
+    const inputs = cells.filter((td, i) => i !== 12).map(td => td.querySelector("textarea"));
+
+    let alertMessage = "";
+
+    if (nameInput && nameInput.value.trim() === "") {
+      alertMessage += "名前を入力してください！\n";
+    }
+
+    const emptyCell = inputs.some(input => !input || input.value.trim() === "");
+    if (emptyCell) {
+      alertMessage += "マスを全て埋めてください！";
+    }
+
+    if (alertMessage) {
+      alert(alertMessage);
+      return;
+    }
+
+    alert("マスを確定します！\n解除ボタンで再配置できます！");
+    
+    cells.forEach((td, i) => {
+      if (i !== 12) {
+        const overlay = td.querySelector(".cell-overlay");
+        if (overlay) overlay.remove();
+        td.dataset.clicked = "false";
+      }
+    });
+
+    inputs.forEach(input => {
+      const td = input.closest("td");
+      td.innerHTML = '<div class="cell-text-wrapper"><div class="cell-text">' + input.value + '</div></div>';
+    });
+
+    const centerCell = document.querySelector("#bingo td[data-row='2'][data-col='2']");
+    centerCell.dataset.clicked = "true";
+
+    let overlay = centerCell.querySelector(".cell-overlay");
+    if (!overlay) {
+      overlay = document.createElement("div");
+      overlay.className = "cell-overlay";
+      overlay.style.position = "absolute";
+      overlay.style.top = "0";
+      overlay.style.left = "0";
+      overlay.style.width = "100%";
+      overlay.style.height = "100%";
+      overlay.style.pointerEvents = "none";
+      overlay.style.zIndex = "0";
+      centerCell.insertBefore(overlay, centerCell.firstChild);
+    }
+
+    const randomBtn = document.getElementById("random-btn");
+    if (randomBtn) randomBtn.remove();
+    const confirmBtn = document.getElementById("confirm-btn");
+    if (confirmBtn) confirmBtn.remove();
+    const resetBtn = document.getElementById("reset-btn");
+    if (resetBtn) resetBtn.remove();
+
+    if (!document.getElementById("color-reset-btn")) {
+      const colorResetBtn = document.createElement("button");
+      colorResetBtn.id = "color-reset-btn";
+      colorResetBtn.textContent = "色リセット";
+      colorResetBtn.onclick = () => {
+        const cells = document.querySelectorAll("#bingo td");
+        cells.forEach(td => {
+          let overlay = td.querySelector(".cell-overlay");
+          if (!overlay) {
+            overlay = document.createElement("div");
+            overlay.className = "cell-overlay";
+            overlay.style.position = "absolute";
+            overlay.style.top = "0";
+            overlay.style.left = "0";
+            overlay.style.width = "100%";
+            overlay.style.height = "100%";
+            overlay.style.pointerEvents = "none";
+            overlay.style.zIndex = "0";
+            td.insertBefore(overlay, td.firstChild);
+          }
+
+          if (!(td.dataset.row === "2" && td.dataset.col === "2")) {
+            td.dataset.clicked = "false";
+          }
+
+          overlay.style.backgroundColor = "";
+          overlay.style.border = "";
+        });
+
+        const centerCell = document.querySelector("#bingo td[data-row='2'][data-col='2']");
+        const centerOverlay = centerCell.querySelector(".cell-overlay");
+        if (centerOverlay) {
+          centerOverlay.style.backgroundColor = "rgba(181, 141, 200, 0.9)";
+        }
+
+        prevReachCount = 0;
+        prevBingoCount = 0;
+      };
+      buttonContainer.appendChild(colorResetBtn);
+    }
+
+    if (!document.getElementById("undo-btn")) {
+      const undoBtn = document.createElement("button");
+      undoBtn.id = "undo-btn";
+      undoBtn.textContent = "解除";
+      undoBtn.addEventListener("click", undoConfirm);
+      buttonContainer.appendChild(undoBtn);
+    }
+
+    const textCells = document.querySelectorAll("#bingo td");
+    textCells.forEach(td => {
+      if (td.dataset.row === "2" && td.dataset.col === "2") return;
+      enableCellClick(td);
+    });
+
+    checkBingo();
+  }
+
+  function undoConfirm() {
+    const cells = Array.from(document.querySelectorAll("#bingo td"));
+
+    cells.forEach((td, i) => {
+      if (i !== 12) disableCellClick(td);
+    });
+
+    cells.forEach(td => {
+      const overlay = td.querySelector(".cell-overlay");
+      if (overlay) overlay.style.backgroundColor = "";
+    });
+
+    cells.forEach((td, i) => {
+      if (i !== 12) {
+        const value = td.textContent.trim();
+        td.innerHTML = `
+          <div class="cell-content">
+            <textarea class="cell-input" rows="1" wrap="soft">${value}</textarea>
+          </div>
+        `;
+      }
+    });
+
+    ["undo-btn", "color-reset-btn"].forEach(id => {
+      const btn = document.getElementById(id);
+      if (btn) btn.remove();
+    });
+
+    if (!document.getElementById("random-btn")) {
+      const btn = document.createElement("button");
+      btn.id = "random-btn";
+      btn.textContent = "ランダム配置";
+      btn.onclick = randomFill;
+      buttonContainer.appendChild(btn);
+    }
+
+    if (!document.getElementById("reset-btn")) {
+      const btn = document.createElement("button");
+      btn.id = "reset-btn";
+      btn.textContent = "リセット";
+      btn.onclick = resetBoard;
+      buttonContainer.appendChild(btn);
+    }
+
+    if (!document.getElementById("confirm-btn")) {
+      const btn = document.createElement("button");
+      btn.id = "confirm-btn";
+      btn.textContent = "確定";
+      btn.onclick = confirmBoard;
+      buttonContainer.appendChild(btn);
+    }
+  }
+
+  function toggleCellColor(td) {
+    td.dataset.clicked = td.dataset.clicked === "true" ? "false" : "true";
+
+    let overlay = td.querySelector(".cell-overlay");
+    if (!overlay) {
+      overlay = document.createElement("div");
+      overlay.className = "cell-overlay";
+      overlay.style.position = "absolute";
+      overlay.style.top = "0";
+      overlay.style.left = "0";
+      overlay.style.width = "100%";
+      overlay.style.height = "100%";
+      overlay.style.pointerEvents = "none";
+      overlay.style.zIndex = "0";
+      td.insertBefore(overlay, td.firstChild);
+    }
+
+    overlay.style.backgroundColor = td.dataset.clicked === "true" 
+                                   ? "rgba(181, 141, 200, 0.9)" 
+                                   : "";
+
+    checkBingo();
+  }
+
+  let prevReachCount = 0;
+  let prevBingoCount = 0;
+
+  function checkBingo() {
+    const cells = Array.from(document.querySelectorAll("#bingo td"));
+
+    const lines = [
+      [0,1,2,3,4],[5,6,7,8,9],[10,11,12,13,14],[15,16,17,18,19],[20,21,22,23,24],
+      [0,5,10,15,20],[1,6,11,16,21],[2,7,12,17,22],[3,8,13,18,23],[4,9,14,19,24],
+      [0,6,12,18,24],[4,8,12,16,20]
+    ];
+
+    cells.forEach(td => {
+      let overlay = td.querySelector(".cell-overlay");
+      if (!overlay) {
+        overlay = document.createElement("div");
+        overlay.className = "cell-overlay";
+        overlay.style.position = "absolute";
+        overlay.style.top = "0";
+        overlay.style.left = "0";
+        overlay.style.width = "100%";
+        overlay.style.height = "100%";
+        overlay.style.pointerEvents = "none";
+        overlay.style.zIndex = "0";
+        td.insertBefore(overlay, td.firstChild);
+      }
+      overlay.style.backgroundColor = td.dataset.clicked === "true" ? "rgba(181, 141, 200, 0.9)" : "";
+      overlay.style.border = "";
+    });
+
+    let reachCells = [];
+    let bingoLines = [];
+    let newReachLines = new Set();
+    let newBingoLines = new Set();
+
+    lines.forEach(line => {
+      const filled = line.filter(i => cells[i].dataset.clicked === "true");
+      if (filled.length === 5) {
+        bingoLines.push(line);
+        newBingoLines.add(line.toString());
+      } else if (filled.length === 4) {
+        const remaining = line.find(i => cells[i].dataset.clicked !== "true");
+        if (remaining !== undefined) {
+          reachCells.push(remaining);
+          newReachLines.add(line.toString());
+        }
+      }
+    });
+
+    newBingoLines.forEach(line => {
+      newReachLines.delete(line);
+    });
+
+    const reachCount = newReachLines.size;
+    const bingoCount = newBingoLines.size;
+
+    reachCells.forEach(i => {
+      const overlay = cells[i].querySelector(".cell-overlay");
+      overlay.style.backgroundColor = "transparent";
+      overlay.style.border = "3px solid red";
+      overlay.style.boxSizing = "border-box";
+    });
+
+    bingoLines.forEach(line => {
+      line.forEach(i => {
+        const overlay = cells[i].querySelector(".cell-overlay");
+        overlay.style.backgroundColor = "rgba(255, 0, 0, 0.9)";
+        overlay.style.border = "";
+      });
+    });
+
+    let message = "";
+    if (reachCount > prevReachCount) {
+      message += `リーチ ${reachCount}列！\n`;
+    }
+    if (bingoCount > prevBingoCount) {
+      message += `ビンゴ ${bingoCount}列！\nおめでとうございます！`;
+    }
+
+    if (message) alert(message);
+
+    prevReachCount = reachCount;
+    prevBingoCount = bingoCount;
+  }
+
+  // ボタンイベントのバインド
+  document.getElementById("random-btn")?.addEventListener("click", randomFill);
+  document.getElementById("reset-btn")?.addEventListener("click", resetBoard);
+  document.getElementById("confirm-btn")?.addEventListener("click", confirmBoard);
+});
