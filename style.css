@@ -34,6 +34,7 @@ td {
   position: relative;
   background-color: #ccc;
 }
+
 .free-cell {
   background-image: url("rainbowranbu.png");
   background-size: cover;
