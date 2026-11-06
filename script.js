@@ -1,7 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
   const container = document.getElementById("name-container");
-  const input = document.getElementById("player-name");
-
   const usedWords = new Set();
   const table = document.querySelector("#bingo tbody");
 
@@ -264,7 +262,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let alertMessage = "";
 
-    if (nameInput && nameInput.value.trim() === "") {
+    if (!nameInput || nameInput.value.trim() === "") {
       alertMessage += "名前を入力してください！\n";
     }
 
@@ -279,7 +277,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     alert("マスを確定します！\n解除ボタンで再配置できます！");
-
+    
+    // 確定時に名前をテキスト化
     const name = nameInput.value.trim();
     container.innerHTML = `
       <div style="
@@ -296,7 +295,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ${name}
       </div>
     `;
-    
+
     cells.forEach((td, i) => {
       if (i !== 12) {
         const overlay = td.querySelector(".cell-overlay");
@@ -333,6 +332,17 @@ document.addEventListener("DOMContentLoaded", () => {
     if (confirmBtn) confirmBtn.remove();
     const resetBtn = document.getElementById("reset-btn");
     if (resetBtn) resetBtn.remove();
+    const loadBtn = document.getElementById("load-btn");
+    if (loadBtn) loadBtn.remove();
+
+    // 保存ボタンの作成
+    if (!document.getElementById("save-btn")) {
+      const saveBtn = document.createElement("button");
+      saveBtn.id = "save-btn";
+      saveBtn.textContent = "保存";
+      saveBtn.addEventListener("click", saveBoard5);
+      buttonContainer.appendChild(saveBtn);
+    }
 
     if (!document.getElementById("color-reset-btn")) {
       const colorResetBtn = document.createElement("button");
@@ -393,6 +403,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function undoConfirm() {
+    // 解除時に名前を入力欄に戻す
     const currentNameDiv = container.querySelector("div");
     const currentName = currentNameDiv ? currentNameDiv.textContent.trim() : "";
     
@@ -402,7 +413,7 @@ document.addEventListener("DOMContentLoaded", () => {
              value="${currentName}"
              style="width:90%; font-size:1.5rem; text-align:center; box-sizing:border-box; display:inline-block; font-family:sans-serif;">
     `;
-    
+
     const cells = Array.from(document.querySelectorAll("#bingo td"));
 
     cells.forEach((td, i) => {
@@ -425,7 +436,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    ["undo-btn", "color-reset-btn"].forEach(id => {
+    ["undo-btn", "color-reset-btn", "save-btn"].forEach(id => {
       const btn = document.getElementById(id);
       if (btn) btn.remove();
     });
@@ -453,6 +464,14 @@ document.addEventListener("DOMContentLoaded", () => {
       btn.onclick = confirmBoard;
       buttonContainer.appendChild(btn);
     }
+
+    if (!document.getElementById("load-btn")) {
+      const btn = document.createElement("button");
+      btn.id = "load-btn";
+      btn.textContent = "読込";
+      btn.onclick = loadBoard5;
+      buttonContainer.appendChild(btn);
+    }
   }
 
   function toggleCellColor(td) {
@@ -477,6 +496,68 @@ document.addEventListener("DOMContentLoaded", () => {
                                    : "";
 
     checkBingo();
+  }
+
+  // 保存処理（名前とマスデータ両方を保存）
+  function saveBoard5() {
+    const currentNameDiv = container.querySelector("div");
+    const name = currentNameDiv ? currentNameDiv.textContent.trim() : "";
+
+    const cells = Array.from(document.querySelectorAll("#bingo td"));
+    const boardData = cells.map((td, i) => {
+      if (i === 12) return null;
+      return td.querySelector(".cell-text")?.textContent.trim() || "";
+    });
+
+    const saveData = {
+      name: name,
+      board: boardData
+    };
+
+    localStorage.setItem("bingoBoard5", JSON.stringify(saveData));
+    alert("保存しました！");
+  }
+
+  // 読込処理（保存された名前とマスデータを読み込み）
+  function loadBoard5() {
+    const saved = localStorage.getItem("bingoBoard5");
+    if (!saved) {
+      alert("保存データがありません");
+      return;
+    }
+
+    const parsedData = JSON.parse(saved);
+    // 旧データ（配列形式）と新データ（オブジェクト形式）の両方に対応
+    const boardData = Array.isArray(parsedData) ? parsedData : parsedData.board;
+    const savedName = !Array.isArray(parsedData) && parsedData.name ? parsedData.name : "";
+
+    if (savedName) {
+      const nameInput = document.getElementById("player-name");
+      if (nameInput) nameInput.value = savedName;
+    }
+
+    const cells = Array.from(document.querySelectorAll("#bingo td"));
+    usedWords.clear();
+
+    cells.forEach((td, i) => {
+      if (i === 12) return;
+
+      const textarea = td.querySelector("textarea");
+      if (textarea) {
+        textarea.value = "";
+        const val = boardData[i] || "";
+        textarea.value = val;
+
+        if (val) {
+          usedWords.add(val);
+          finalizeInput(textarea, td, val);
+        } else {
+          td.style.background = "#ccc";
+        }
+      }
+    });
+
+    alert("保存データを読み込みました");
   }
 
   let prevReachCount = 0;
@@ -568,4 +649,5 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("random-btn")?.addEventListener("click", randomFill);
   document.getElementById("reset-btn")?.addEventListener("click", resetBoard);
   document.getElementById("confirm-btn")?.addEventListener("click", confirmBoard);
+  document.getElementById("load-btn")?.addEventListener("click", loadBoard5);
 });
