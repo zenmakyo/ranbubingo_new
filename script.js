@@ -337,16 +337,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (confirmBtn) confirmBtn.remove();
     const resetBtn = document.getElementById("reset-btn");
     if (resetBtn) resetBtn.remove();
-    const loadBtn = document.getElementById("load-btn");
-    if (loadBtn) loadBtn.remove();
-
-    if (!document.getElementById("save-btn")) {
-      const saveBtn = document.createElement("button");
-      saveBtn.id = "save-btn";
-      saveBtn.textContent = "保存";
-      saveBtn.addEventListener("click", saveBoard5);
-      buttonContainer.appendChild(saveBtn);
-    }
 
     if (!document.getElementById("color-reset-btn")) {
       const colorResetBtn = document.createElement("button");
@@ -457,14 +447,6 @@ document.addEventListener("DOMContentLoaded", () => {
       btn.onclick = confirmBoard;
       buttonContainer.appendChild(btn);
     }
-
-    if (!document.getElementById("load-btn")) {
-      const btn = document.createElement("button");
-      btn.id = "load-btn";
-      btn.textContent = "読込";
-      btn.onclick = loadBoard5;
-      buttonContainer.appendChild(btn);
-    }
   }
 
   function toggleCellColor(td) {
@@ -490,24 +472,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     checkBingo();
   }
-
-  function saveBoard5() {
-    const cells = Array.from(document.querySelectorAll("#bingo td"));
-    const boardData = cells.map((td, i) => {
-      if (i === 12) return null;
-      return td.querySelector(".cell-text")?.textContent.trim() || "";
-    });
-
-    localStorage.setItem("bingoBoard5", JSON.stringify(boardData));
-    alert("保存しました！");
-  }
-
-  function loadBoard5() {
-    const saved = localStorage.getItem("bingoBoard5");
-    if (!saved) {
-      alert("保存データがありません");
-      return;
-    }
 
     const boardData = JSON.parse(saved);
     const cells = Array.from(document.querySelectorAll("#bingo td"));
@@ -624,5 +588,4 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("random-btn")?.addEventListener("click", randomFill);
   document.getElementById("reset-btn")?.addEventListener("click", resetBoard);
   document.getElementById("confirm-btn")?.addEventListener("click", confirmBoard);
-  document.getElementById("load-btn")?.addEventListener("click", loadBoard5);
 });
