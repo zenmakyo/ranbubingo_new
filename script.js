@@ -2,29 +2,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const container = document.getElementById("name-container");
   const input = document.getElementById("player-name");
 
-  if (input) {
-    input.addEventListener("change", () => {
-      const name = input.value.trim();
-      if (name === "") return;
-
-      container.innerHTML = `
-        <div style="
-          font-family: 'Zen Kurenaido', sans-serif;
-          font-size: 2rem;
-          color: white;
-          -webkit-text-stroke: 3px black;
-          paint-order: stroke fill;
-          font-weight: bold;
-          padding: 0.5rem;
-          line-height: 1.1;
-          text-align: center;
-        ">
-          ${name}
-        </div>
-      `;
-    });
-  }
-
   const usedWords = new Set();
   const table = document.querySelector("#bingo tbody");
 
@@ -302,6 +279,23 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     alert("マスを確定します！\n解除ボタンで再配置できます！");
+
+    const name = nameInput.value.trim();
+    container.innerHTML = `
+      <div style="
+        font-family: 'Zen Kurenaido', sans-serif;
+        font-size: 2rem;
+        color: white;
+        -webkit-text-stroke: 3px black;
+        paint-order: stroke fill;
+        font-weight: bold;
+        padding: 0.5rem;
+        line-height: 1.1;
+        text-align: center;
+      ">
+        ${name}
+      </div>
+    `;
     
     cells.forEach((td, i) => {
       if (i !== 12) {
@@ -399,6 +393,16 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function undoConfirm() {
+    const currentNameDiv = container.querySelector("div");
+    const currentName = currentNameDiv ? currentNameDiv.textContent.trim() : "";
+    
+    container.innerHTML = `
+      <input type="text" id="player-name" 
+             placeholder="名前を入力してください"
+             value="${currentName}"
+             style="width:90%; font-size:1.5rem; text-align:center; box-sizing:border-box; display:inline-block; font-family:sans-serif;">
+    `;
+    
     const cells = Array.from(document.querySelectorAll("#bingo td"));
 
     cells.forEach((td, i) => {
