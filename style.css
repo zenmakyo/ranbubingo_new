@@ -144,8 +144,8 @@ button {
 .cell-select-btn {
   width: 90%;
   height: 90%;
-  background: transparent;
-  border: 1px dashed #555;
+  background: rgba(255, 255, 255, 0.6);
+  border: none;
   color: #333;
   font-size: 2.2vmin;
   cursor: pointer;
