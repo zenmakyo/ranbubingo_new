@@ -19,6 +19,43 @@
     </span>
   </h1>
 
+  <!-- メニューを開くロゴボタン -->
+<button type="button" class="site-logo" id="menuOpen" aria-label="メニューを開く" aria-expanded="false" aria-controls="siteMenu">
+    <img src="site-logo.png" alt="">
+</button>
+
+<!-- サイトメニュー -->
+<div id="siteMenu" class="site-menu-overlay" hidden>
+    <nav class="site-menu" aria-label="サイトメニュー">
+
+        <a href="https://zenmakyo.github.io/genmono2/" class="site-menu-item">
+            <span>トップページ</span>
+            <span class="site-menu-arrow" aria-hidden="true">▶︎</span>
+        </a>
+
+        <a href="https://zenmakyo.github.io/fighting-simulator/" class="site-menu-item">
+            <span>討伐シミュレータ</span>
+            <span class="site-menu-arrow" aria-hidden="true">▶︎</span>
+        </a>
+
+        <a href="https://zenmakyo.github.io/status-simulator/" class="site-menu-item">
+            <span>ステータスシミュレータ</span>
+            <span class="site-menu-arrow" aria-hidden="true">▶︎</span>
+        </a>
+
+        <a href="https://zenmakyo.github.io/leveling-simulator/" class="site-menu-item">
+            <span>レベリングシミュレータ</span>
+            <span class="site-menu-arrow" aria-hidden="true">▶︎</span>
+        </a>
+
+        <a href="https://zenmakyo.github.io/ranbubingo_new/" class="site-menu-item">
+            <span>乱舞ビンゴ用テンプレート</span>
+            <span class="site-menu-arrow" aria-hidden="true">▶︎</span>
+        </a>
+
+    </nav>
+</div>
+
   <button id="external-btn" style="
     font-size: 1.4rem;
     position: absolute;
@@ -49,6 +86,7 @@
     <button id="load-btn">読込</button>
   </div>
 
+  <script src="menu.js></script>
   <script src="list.js"></script>
   <script src="script.js"></script>
 </body>
