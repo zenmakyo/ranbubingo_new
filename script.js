@@ -253,3 +253,4 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function resetBoard() {
     const inputs = document.querySelectorAll
+  }
